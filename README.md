@@ -23,3 +23,4 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 * Sort terms by revelance order
 * Parametrize the relevance metric
 * Group terms by significance
+* Compare with the non-succinct analogous structure
