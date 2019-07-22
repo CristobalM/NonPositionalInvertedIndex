@@ -1,14 +1,16 @@
 #include <iostream>
-#include <sdsl/int_vector.hpp>
-#include <sdsl/wavelet_trees.hpp>
+
 
 #include <stdexcept>
 
 #include "DocumentsHandler.h"
 #include "InvertedIndex.h"
-#include "WTHGogHandler.h"
+#include "WTHGog.h"
+#include "BVHGog.h"
 
 int main(int argc, char **argv) {
+
+
 
   /*
   sdsl::int_vector<> iv(10);
@@ -16,6 +18,7 @@ int main(int argc, char **argv) {
   sdsl::wt_int<> wt();
   */
 
+  /*
   if(argc <= 1){
     throw std::runtime_error("Documents directory missing (First argument)");
   }
@@ -27,8 +30,27 @@ int main(int argc, char **argv) {
   documentsHandler.scanWords();
   //documentsHandler.debugPrintScannedWords();
 
-  InvertedIndex<DocumentsHandler, WTHGogHandler> invertedIndex(documentsHandler);
+  InvertedIndex<DocumentsHandler, WTHGog> invertedIndex(documentsHandler);
+   */
 
+  BVHGog bvhGog(10);
+  bvhGog.bitset(5);
+  bvhGog.bitset(3);
+  bvhGog.bitset(2);
+  bvhGog.bitset(10);
+  //bvhGog.bitset(1);
+  // 0 1 1 0 1 0 0 0 0 1
+  bvhGog.buildStructures();
+  std::cout << bvhGog.rank(10) << std::endl;
+  std::cout << bvhGog.rank_0(10) << std::endl;
+  std::cout << bvhGog.select_0(1) << std::endl;
+  std::cout << bvhGog.select_1(1) << std::endl;
+  std::cout << bvhGog.select_1(4) << std::endl;
+  std::cout << bvhGog.select_0(4) << std::endl;
+  //std::cout << bvhGog.select_0(6) << std::endl;
+  //std::cout << bvhGog.select_0(7) << std::endl;
+  //std::cout << bvhGog.select_1(6) << std::endl;
+  //bvhGog.select_1(0);
 
   return 0;
 }

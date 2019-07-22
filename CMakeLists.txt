@@ -12,10 +12,12 @@ link_directories(~/lib)
 add_executable(NonPosInvIdx
         main.cpp
         InvertedIndex.h InvertedIndex.cpp
-        WTHGogHandler.h WTHGogHandler.cpp
+        WTHGog.h WTHGog.cpp
+        BVHGog.h BVHGog.cpp
         DocumentInfo.h DocumentInfo.cpp
         DocumentsHandler.h DocumentsHandler.cpp
         IWordToDocFreqMap.h
+
         )
 target_link_libraries(NonPosInvIdx sdsl stdc++fs)
 
