@@ -12,11 +12,10 @@
 
 
 class WTHGog {
-  BVHGog<> terms_separator;
   sdsl::wt_blcd<> wt;
 public:
-  explicit WTHGog(const std::string& sequenceInput) : terms_separator(sequenceInput.size()){
-    
+  explicit WTHGog(const std::string& sequenceInput){
+
   }
 };
 

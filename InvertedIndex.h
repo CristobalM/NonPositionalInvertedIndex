@@ -7,10 +7,13 @@
 
 #include <memory>
 
+#include "BVHGog.h"
 
 template<class WordToDocFreqMap, class WTHandler>
 class InvertedIndex {
   WTHandler wtHandler;
+  std::unique_ptr<BVHGog<>> terms_separator;
+
 
 public:
   InvertedIndex(WordToDocFreqMap &wordToDocFreqMap){
