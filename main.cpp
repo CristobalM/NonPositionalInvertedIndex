@@ -5,8 +5,8 @@
 
 #include "DocumentsHandler.h"
 #include "InvertedIndex.h"
-#include "WTHGog.h"
-#include "BVHGog.h"
+#include "WTHGog.hpp"
+#include "BVHGog.hpp"
 
 int main(int argc, char **argv) {
 

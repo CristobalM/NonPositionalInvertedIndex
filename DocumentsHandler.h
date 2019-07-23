@@ -15,7 +15,6 @@
 #include <sstream>
 
 #include "DocumentInfo.h"
-#include "IWordToDocFreqMap.h"
 
 namespace fs = std::experimental::filesystem;
 class DocumentsHandler {

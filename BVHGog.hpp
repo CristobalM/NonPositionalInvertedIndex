@@ -2,8 +2,8 @@
 // Created by Cristobal Miranda, 2019
 //
 
-#ifndef NONPOSINVIDX_BVHGOG_H
-#define NONPOSINVIDX_BVHGOG_H
+#ifndef NONPOSINVIDX_BVHGOG_HPP
+#define NONPOSINVIDX_BVHGOG_HPP
 
 #include <memory>
 
@@ -164,4 +164,4 @@ public:
 };
 
 
-#endif //NONPOSINVIDX_BVHGOG_H
+#endif //NONPOSINVIDX_BVHGOG_HPP

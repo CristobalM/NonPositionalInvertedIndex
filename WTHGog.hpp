@@ -2,8 +2,8 @@
 // Created by Cristobal Miranda, 2019
 //
 
-#ifndef NONPOSINVIDX_WTHGOG_H
-#define NONPOSINVIDX_WTHGOG_H
+#ifndef NONPOSINVIDX_WTHGOG_HPP
+#define NONPOSINVIDX_WTHGOG_HPP
 
 #include <vector>
 #include <sdsl/int_vector.hpp>
@@ -11,7 +11,7 @@
 
 #include <iostream> // debug
 
-#include "BVHGog.h"
+#include "BVHGog.hpp"
 
 
 static const uint8_t _DEFAULT_IV_SZ = 32;
@@ -71,4 +71,4 @@ public:
 };
 
 
-#endif //NONPOSINVIDX_WTHGOG_H
+#endif //NONPOSINVIDX_WTHGOG_HPP

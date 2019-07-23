@@ -11,7 +11,7 @@
 
 #include <stdexcept>
 
-#include "BVHGog.h"
+#include "BVHGog.hpp"
 
 
 // Term-frequency order
