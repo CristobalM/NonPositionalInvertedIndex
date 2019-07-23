@@ -2,6 +2,7 @@
 // Created by Cristobal Miranda, 2019
 //
 
+#include <cassert>
 #include "DocumentsHandler.h"
 
 DocumentsHandler::DocumentsHandler(bool clean_on_scan) : clean_on_scan(clean_on_scan), last_assigned_int(0) {}
@@ -11,6 +12,7 @@ void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_p
   for (auto &doc_fname : dir_iterator) {
     documents.push_back(std::make_unique<DocumentInfo>(doc_fname.path()));
     std::cout << "Creating DocumentInfo with path: " << doc_fname.path() << std::endl;
+    documentsNames.push_back(doc_fname.path());
   }
 }
 
@@ -71,4 +73,13 @@ int DocumentsHandler::getWordIdxByName(const std::string &word_name) {
     return -1;
   }
   return words_map[word_name];
+}
+
+uint DocumentsHandler::getUniqueDocsCount() {
+  return documents.size();
+}
+
+std::string DocumentsHandler::getDocNameByIdx(int doc_idx) {
+  assert(doc_idx >= 0 && doc_idx < documentsNames.size());
+  return documentsNames[doc_idx];
 }
