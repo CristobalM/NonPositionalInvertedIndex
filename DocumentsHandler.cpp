@@ -62,6 +62,13 @@ unsigned long DocumentsHandler::getUniqueWordsCount() {
   return last_assigned_int;
 }
 
-bool DocumentsHandler::wordExists(const std::string &word){
+bool DocumentsHandler::wordExists(const std::string &word) {
   return words_map.find(word) != words_map.end();
+}
+
+int DocumentsHandler::getWordIdxByName(const std::string &word_name) {
+  if (!wordExists(word_name)) {
+    return -1;
+  }
+  return words_map[word_name];
 }

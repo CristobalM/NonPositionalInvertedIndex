@@ -2,8 +2,8 @@
 // Created by Cristobal Miranda, 2019
 //
 
-#ifndef NONPOSINVIDX_INVERTEDINDEX_H
-#define NONPOSINVIDX_INVERTEDINDEX_H
+#ifndef NONPOSINVIDX_INVERTEDINDEX_HPP
+#define NONPOSINVIDX_INVERTEDINDEX_HPP
 
 #include <memory>
 #include <algorithm>
@@ -176,4 +176,4 @@ public:
 };
 
 
-#endif //NONPOSINVIDX_INVERTEDINDEX_H
+#endif //NONPOSINVIDX_INVERTEDINDEX_HPP

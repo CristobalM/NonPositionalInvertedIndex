@@ -12,7 +12,6 @@ void DocumentInfo::readDocument() {
   file.open(filename);
 
   std::string line;
-  //std::regex WORD_REGEX("([^\\s]+)");
   while (std::getline(file, line)) {
     std::smatch sm;
 
@@ -52,8 +51,4 @@ bool DocumentInfo::hasKey(std::unordered_map<std::string, int> &map_, const std:
 int DocumentInfo::getUniqueWC() {
   return  words_freq_pairs.size();
 }
-
-
-
-//const std::regex DocumentInfo::WORD_REGEX = std::regex("([^\\s]+)");
 

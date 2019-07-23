@@ -4,7 +4,7 @@
 #include <stdexcept>
 
 #include "DocumentsHandler.h"
-#include "InvertedIndex.h"
+#include "InvertedIndex.hpp"
 #include "WTHGog.hpp"
 #include "BVHGog.hpp"
 

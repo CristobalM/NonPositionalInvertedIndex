@@ -41,12 +41,7 @@ public:
 
   std::vector<std::pair<int, int>> &getWordDocs(int word_idx);
 
-  int getWordIdxByName(const std::string &word_name){
-    if(!wordExists(word_name)){
-      return -1;
-    }
-    return words_map[word_name];
-  }
+  int getWordIdxByName(const std::string &word_name);
 
   unsigned long getUniqueWordsCount();
 };

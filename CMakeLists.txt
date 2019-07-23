@@ -11,7 +11,7 @@ link_directories(~/lib)
 
 add_executable(NonPosInvIdx
         main.cpp
-        InvertedIndex.h
+        InvertedIndex.hpp
         WTHGog.hpp
         BVHGog.hpp
         DocumentInfo.h DocumentInfo.cpp
