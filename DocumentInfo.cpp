@@ -12,11 +12,11 @@ void DocumentInfo::readDocument() {
   file.open(filename);
 
   std::string line;
-  std::regex reg_ex("([^\\s]+)");
+  //std::regex WORD_REGEX("([^\\s]+)");
   while (std::getline(file, line)) {
     std::smatch sm;
 
-    for (auto r_it = std::sregex_iterator(line.begin(), line.end(), reg_ex); r_it != std::sregex_iterator(); r_it++) {
+    for (auto r_it = std::sregex_iterator(line.begin(), line.end(), WORD_REGEX); r_it != std::sregex_iterator(); r_it++) {
       auto match = *r_it;
       auto word = match.str(0);
       if (!hasKey(word_count, word)) {
@@ -34,7 +34,8 @@ void DocumentInfo::readDocument() {
   file.close();
 }
 
-DocumentInfo::DocumentInfo(const std::string &filename) : filename(filename), words_count(0), unique_words_count(0) {}
+DocumentInfo::DocumentInfo(const std::string &filename) : filename(filename), words_count(0){
+}
 
 std::vector<std::pair<std::string, int>> &DocumentInfo::getWordsFreqPairs() {
   return words_freq_pairs;
@@ -47,3 +48,12 @@ void DocumentInfo::clean() {
 bool DocumentInfo::hasKey(std::unordered_map<std::string, int> &map_, const std::string &key){
   return map_.find(key) != map_.end();
 }
+
+int DocumentInfo::getUniqueWC() {
+  return  words_freq_pairs.size();
+}
+
+
+
+//const std::regex DocumentInfo::WORD_REGEX = std::regex("([^\\s]+)");
+

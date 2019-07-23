@@ -16,9 +16,11 @@
 
 class DocumentInfo {
   std::vector<std::pair<std::string, int>> words_freq_pairs;
+
   int words_count;
-  int unique_words_count;
   std::string filename;
+
+  inline static const std::regex WORD_REGEX = std::regex("([^\\s]+)");;
 
   static inline bool hasKey(std::unordered_map<std::string, int> &map_, const std::string &key);
 
@@ -28,6 +30,8 @@ public:
   void readDocument();
 
   std::vector<std::pair<std::string, int>> &getWordsFreqPairs();
+
+  int getUniqueWC();
 
   void clean();
 };

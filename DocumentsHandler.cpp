@@ -58,7 +58,7 @@ std::vector<std::pair<int, int>> &DocumentsHandler::getWordDocs(int word_idx) {
   return words_to_docs_map[word_idx];
 }
 
-int DocumentsHandler::getUniqueWordsCount() {
+unsigned long DocumentsHandler::getUniqueWordsCount() {
   return last_assigned_int;
 }
 

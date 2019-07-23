@@ -11,7 +11,7 @@
 #include <sdsl/rank_support_v5.hpp>
 #include <sdsl/select_support_mcl.hpp>
 
-using uint = unsigned int;
+using uint = uint32_t ;
 
 template<class BVGog>
 class RankSupportConstantGog {
@@ -86,19 +86,19 @@ class BVHGog {
 
 public:
   explicit BVHGog(unsigned long bv_size) :
-  bv_size(bv_size), bv(bv_size), structures_built(false), nofzeros(0), nofones(0) {}
+          bv_size(bv_size), bv(bv_size), structures_built(false), nofzeros(0), nofones(0) {}
 
-  void bitset(uint i){
+  void bitset(uint i) {
     assert(i >= 1 && i <= bv_size);
-    bv[i-1] = 1;
+    bv[i - 1] = 1;
   }
 
-  void bitclear(uint i){
+  void bitclear(uint i) {
     assert(i >= 1 && i <= bv_size);
-    bv[i-1] = 0;
+    bv[i - 1] = 0;
   }
 
-  void buildStructures(){
+  void buildStructures() {
     rankSupport = std::make_unique<Rk>(&bv);
     select0Support = std::make_unique<Sel0>(&bv);
     select1Support = std::make_unique<Sel1>(&bv);
@@ -107,43 +107,58 @@ public:
     nofzeros = bv_size - nofones;
   }
 
-  inline uint rank(uint i){
-    if(!structures_built){
+  inline uint rank(uint i) {
+    if (!structures_built) {
       throw std::runtime_error("Rank structure was not built");
+    }
+    if(i == 0){
+      return 0;
     }
     assert(i >= 1 && i <= bv_size);
 
     return rankSupport->rank(i);
   }
 
-  inline uint rank_0(uint i){
+  inline uint rank_0(uint i) {
     return i - rank(i);
   }
 
-  inline uint rank_1(uint i){
+  inline uint rank_1(uint i) {
     return rank(i);
   }
 
-  inline uint select_0(uint i){
-    if(!structures_built){
+  inline uint select_0(uint i) {
+    if (!structures_built) {
       throw std::runtime_error("Select 0 structure was not built");
     }
     assert(i >= 1 && i <= bv_size);
-    if(i > nofzeros){
+    if (i > nofzeros) {
       return bv_size + 1;
     }
     return select0Support->select(i) + 1;
   }
 
-  inline uint select_1(uint i){
-    if(!structures_built){
+  inline uint select_1(uint i) {
+    if (!structures_built) {
       throw std::runtime_error("Select 1 structure was not built");
     }
     assert(i >= 1 && i <= bv_size);
-    if(i > nofones){
+    if (i > nofones) {
       return bv_size + 1;
     }
     return select1Support->select(i) + 1;
+  }
+
+  inline uint pred(uint i){
+    return select_1(rank(i));
+  }
+  inline uint succ(uint i){
+    return select_1(rank(i-1) + 1);
+  }
+
+  void debugDisplay() {
+    std::cout << "Debug display of BVHGog: \n"
+              << bv << std::endl;
   }
 
 };

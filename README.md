@@ -13,14 +13,15 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 
 ### Done
 * Read documents inside a directory
-
-### To do
 * Make wrapper for Gog's Wavelet Tree
 * Build Wavelet Tree
 * Implement basic inverted index operations
-* Implement **AND**
-* Implement **OR**
 * Sort terms by revelance order
 * Parametrize the relevance metric
+
+### To do
+
+* Implement **AND**
+* Implement **OR**
 * Group terms by significance
 * Compare to the non-succinct analogous structure
