@@ -38,6 +38,6 @@ add_library(NonPosInvIdx ${INCLUDES_PATHS} ${SOURCES_PATHS})
 
 target_link_libraries(NonPosInvIdx sdsl stdc++fs)
 
-add_executable(NonPosInvIdx_example examples/example_1.cpp)
-target_link_libraries(NonPosInvIdx_example NonPosInvIdx)
+add_executable(example_1 examples/example_1.cpp)
+target_link_libraries(example_1 NonPosInvIdx)
 

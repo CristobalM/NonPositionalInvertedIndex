@@ -126,7 +126,6 @@ class InvertedIndex {
     terms_separator = std::move(grouping.terms_separator);
     wtHandler = std::make_unique<WTHandler>(raw_result_sequence);
 
-    terms_separator->debugDisplay();
   }
 
 public:
@@ -146,6 +145,11 @@ public:
   inline uint ithDoc(WordToDocFreqMap &wordToDocFreqMap, const std::string &term_s, int i) {
     auto word_idx = wordToDocFreqMap.getWordIdxByName(term_s);
     return ithDoc(word_idx, i);
+  }
+
+  inline std::string ithDocName(WordToDocFreqMap &wordToDocFreqMap, const std::string &term_s, int i) {
+    auto ith_doc = ithDoc(wordToDocFreqMap, term_s, i);
+    return wordToDocFreqMap.getDocNameByIdx(ith_doc);
   }
 
   /** Get the list of documents paths where both term_a and term_b appear **/
@@ -232,7 +236,12 @@ private:
                                ". Range: [1, " + std::to_string(word_idx_mapping.size()) + ")");
     }
 
-    auto[it, _] = getTermInterval(term_idx);
+    auto[it, ft] = getTermInterval(term_idx);
+
+    if(it + i - 1 > ft){
+      throw std::runtime_error("#"+std::to_string(i) +
+      " document does not exist for term with index " + std::to_string(term_idx));
+    }
 
     wtHandler->access(it + i - 1);
   }

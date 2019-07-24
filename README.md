@@ -25,3 +25,24 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 ### To do
 
 * Compare to another inverted index
+
+
+## Build
+
+* First make sure SDSL is installed in ~/include and ~/lib as specified by its repository.
+* Alternatively, SDSL install location can be changed from CMakeLists.txt
+
+From the root directory of this project run:
+
+```
+mkdir build
+cd build
+cmake ..
+make
+```
+
+## Run example
+```
+cd build
+./example_1 ../examples/lorem_ipsum dolor Lorem
+```
