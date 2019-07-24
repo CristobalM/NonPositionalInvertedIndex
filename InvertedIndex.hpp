@@ -118,12 +118,6 @@ class InvertedIndex {
   uint alphabet_sz;
 
 
-public:
-  explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap) : alphabet_sz(
-          (uint) wordToDocFreqMap.getUniqueDocsCount()) {
-    buildInvertedIndex(wordToDocFreqMap);
-  }
-
   void buildInvertedIndex(WordToDocFreqMap &wordToDocFreqMap) {
     auto orderedByRelevance = RelevanceDocOrder::order(wordToDocFreqMap);
     auto grouping = TermGrouping::group(orderedByRelevance);
@@ -134,6 +128,14 @@ public:
 
     terms_separator->debugDisplay();
   }
+
+public:
+  explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap) : alphabet_sz(
+          (uint) wordToDocFreqMap.getUniqueDocsCount()) {
+    buildInvertedIndex(wordToDocFreqMap);
+  }
+
+
 
   std::pair<uint, uint> getTermInterval(int term_idx) {
     auto inner_idx = word_idx_mapping[term_idx];
@@ -184,6 +186,50 @@ public:
     return *wtHandler;
   }
 
+  std::vector<int> termListIntersection(WordToDocFreqMap &wordToDocFreqMap,
+                                        const std::string &term_a, const std::string &term_b) {
+    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
+    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
+    auto inner_idx_a = word_idx_mapping[term_a_idx];
+    auto inner_idx_b = word_idx_mapping[term_b_idx];
+
+    return termListIntersection(inner_idx_a, inner_idx_b);
+  }
+
+  std::vector<std::string> termListIntersectionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
+                                                          const std::string &term_a, const std::string &term_b) {
+    auto indexes_result = termListIntersection(wordToDocFreqMap, term_a, term_b);
+    std::vector<std::string> result;
+
+    for (auto &doc_idx : indexes_result) {
+      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
+    }
+    return result;
+  }
+
+
+  std::vector<int> termListUnion(WordToDocFreqMap &wordToDocFreqMap,
+                                 const std::string &term_a, const std::string &term_b) {
+    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
+    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
+    auto inner_idx_a = word_idx_mapping[term_a_idx];
+    auto inner_idx_b = word_idx_mapping[term_b_idx];
+
+    return termListUnion(inner_idx_a, inner_idx_b);
+  }
+
+  std::vector<std::string> termListUnionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
+                                                   const std::string &term_a, const std::string &term_b) {
+    auto indexes_result = termListUnion(wordToDocFreqMap, term_a, term_b);
+    std::vector<std::string> result;
+
+    for (auto &doc_idx : indexes_result) {
+      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
+    }
+    return result;
+  }
+
+private:
 
   using WTNode = typename WTHandler::WTNode;
   struct TraversalNode {
@@ -220,69 +266,69 @@ public:
   }
 
 
-  struct AndOperation{
-    static inline bool failCondition(TraversalNode &currentTNode){
+  struct AndOperation {
+    static inline bool failCondition(TraversalNode &currentTNode) {
       return anyOutOfBounds(currentTNode);
     }
+
     static inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
-            uint *first_term_left_idx, uint *first_term_right_idx,
-            uint *second_term_left_idx, uint *second_term_right_idx){
+                                        uint *first_term_left_idx, uint *first_term_right_idx,
+                                        uint *second_term_left_idx, uint *second_term_right_idx) {
       *first_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
-                                                     currentTNode.first_term_left_idx - 1) + 1;
+                                                      currentTNode.first_term_left_idx - 1) + 1;
       *first_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
-                                                      currentTNode.first_term_right_idx);
+                                                       currentTNode.first_term_right_idx);
 
       *second_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
-                                                      currentTNode.second_term_left_idx - 1) + 1;
+                                                       currentTNode.second_term_left_idx - 1) + 1;
       *second_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
-                                                       currentTNode.second_term_right_idx);
+                                                        currentTNode.second_term_right_idx);
     }
 
-    static inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode){
+    static inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode) {
       intersection_result.push_back(currentTNode.left_symbol);
     }
   };
 
-  struct OrOperation{
+  struct OrOperation {
     bool first_fail, second_fail;
     std::unordered_map<uint, bool> foundTerms;
 
-    inline bool failCondition(TraversalNode &currentTNode){
+    inline bool failCondition(TraversalNode &currentTNode) {
       first_fail = firstOutOfBounds(currentTNode);
       second_fail = secondOutOfBounds(currentTNode);
 
       return first_fail && second_fail; // bothOutOfBounds
 
     }
+
     inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
                                  uint *first_term_left_idx, uint *first_term_right_idx,
-                                 uint *second_term_left_idx, uint *second_term_right_idx){
+                                 uint *second_term_left_idx, uint *second_term_right_idx) {
 
-      if(!first_fail){
+      if (!first_fail) {
         *first_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
                                                         currentTNode.first_term_left_idx - 1) + 1;
         *first_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
                                                          currentTNode.first_term_right_idx);
-      }
-      else{
+      } else {
         *first_term_left_idx = 1;
         *first_term_right_idx = 0;
       }
-      if(!second_fail){
+      if (!second_fail) {
         *second_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
                                                          currentTNode.second_term_left_idx - 1) + 1;
         *second_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
                                                           currentTNode.second_term_right_idx);
-      }
-      else{
+      } else {
         *second_term_left_idx = 1;
         *second_term_right_idx = 0;
       }
     }
 
-    inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode){
+    inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode) {
       auto term = currentTNode.left_symbol;
-      if(foundTerms.find(term) == foundTerms.end()){
+      if (foundTerms.find(term) == foundTerms.end()) {
         foundTerms[term] = true;
         intersection_result.push_back(currentTNode.left_symbol);
       }
@@ -291,55 +337,13 @@ public:
 
   };
 
-
-  inline std::vector<int> termListIntersection(uint termAIdx, uint termBIdx){
+  inline std::vector<int> termListIntersection(uint termAIdx, uint termBIdx) {
     return treeTraversal<AndOperation>(termAIdx, termBIdx);
   }
 
-  std::vector<int> termListIntersection(WordToDocFreqMap &wordToDocFreqMap,
-                                        const std::string &term_a, const std::string &term_b) {
-    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
-    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
-    auto inner_idx_a = word_idx_mapping[term_a_idx];
-    auto inner_idx_b = word_idx_mapping[term_b_idx];
 
-    return termListIntersection(inner_idx_a, inner_idx_b);
-  }
-
-  std::vector<std::string> termListIntersectionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
-                                                          const std::string &term_a, const std::string &term_b) {
-    auto indexes_result = termListIntersection(wordToDocFreqMap, term_a, term_b);
-    std::vector<std::string> result;
-
-    for (auto &doc_idx : indexes_result) {
-      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
-    }
-    return result;
-  }
-
-  inline std::vector<int> termListUnion(uint termAIdx, uint termBIdx){
+  inline std::vector<int> termListUnion(uint termAIdx, uint termBIdx) {
     return treeTraversal<OrOperation>(termAIdx, termBIdx);
-  }
-
-  std::vector<int> termListUnion(WordToDocFreqMap &wordToDocFreqMap,
-                                         const std::string &term_a, const std::string &term_b) {
-    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
-    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
-    auto inner_idx_a = word_idx_mapping[term_a_idx];
-    auto inner_idx_b = word_idx_mapping[term_b_idx];
-
-    return termListUnion(inner_idx_a, inner_idx_b);
-  }
-
-  std::vector<std::string> termListUnionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
-                                                           const std::string &term_a, const std::string &term_b) {
-    auto indexes_result = termListUnion(wordToDocFreqMap, term_a, term_b);
-    std::vector<std::string> result;
-
-    for (auto &doc_idx : indexes_result) {
-      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
-    }
-    return result;
   }
 
 
@@ -356,10 +360,10 @@ public:
     uint left_symbol_root = 0u;
 
     auto lg2 = std::log2(alphabet_sz);
-    auto lg2u = (uint)lg2;
+    auto lg2u = (uint) lg2;
     uint greaterPowerOf2 = lg2u + (lg2 > lg2u ? 1u : 0u);
 
-    uint right_symbol_root =  (1u << (greaterPowerOf2)) - 1;
+    uint right_symbol_root = (1u << (greaterPowerOf2)) - 1;
 
     traversalStack.push({left_symbol_root, right_symbol_root,
                          itA, ftA,
@@ -367,7 +371,6 @@ public:
                          root});
 
     TraversalOperation traversalOperation;
-
 
     while (!traversalStack.empty()) {
       auto &currentTNode = traversalStack.top();
@@ -383,22 +386,19 @@ public:
         continue;
       }
 
-      if(wtHandler->isLeaf(currentTNode.wt_node)){
+      if (wtHandler->isLeaf(currentTNode.wt_node)) {
         traversalStack.pop();
         continue;
       }
 
       uint m = (currentTNode.left_symbol + currentTNode.right_symbol) >> 1u;
 
-
-
       uint first_term_left_idx, first_term_right_idx, second_term_left_idx, second_term_right_idx;
 
       traversalOperation.setTermVariables(*wtHandler, currentTNode, &first_term_left_idx, &first_term_right_idx,
-              &second_term_left_idx, &second_term_right_idx);
+                                          &second_term_left_idx, &second_term_right_idx);
 
-
-      auto [left_child, right_child] = wtHandler->getChildren(currentTNode.wt_node);
+      auto[left_child, right_child] = wtHandler->getChildren(currentTNode.wt_node);
 
 
       TraversalNode traversal_node_left = {
@@ -417,17 +417,13 @@ public:
               right_child
       };
 
-
       traversalStack.pop();
       traversalStack.push(std::move(traversal_node_right));
       traversalStack.push(std::move(traversal_node_left));
-
     }
 
     return intersection_result;
   }
-
-
 };
 
 

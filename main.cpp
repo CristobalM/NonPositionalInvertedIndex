@@ -12,14 +12,6 @@
 
 int main(int argc, char **argv) {
 
-
-
-  /*
-  sdsl::int_vector<> iv(10);
-  iv[2] = 1;
-  sdsl::wt_int<> wt();
-  */
-
   if(argc <= 1){
     throw std::runtime_error("Documents directory missing (First argument)");
   }
@@ -74,18 +66,20 @@ int main(int argc, char **argv) {
   };
 
 
+  auto firstWord = "SI";
+  auto secondWord = "HOLA";
 
-  auto r1 = invertedIndex.termListIntersectionByDocNames(documentsHandler, "SI", "UNO");
-  auto r1_ = invertedIndex.termListIntersection(documentsHandler, "SI", "UNO");
+  auto r1 = invertedIndex.termListIntersectionByDocNames(documentsHandler, firstWord, secondWord);
+  auto r1_ = invertedIndex.termListIntersection(documentsHandler, firstWord, secondWord);
   std::cout << "r1: ";
   printVecS(r1);
   std::cout << "r1_: ";
   printVecI(r1_);
 
-  auto r2 = invertedIndex.termListUnionByDocNames(documentsHandler, "SI", "UNO");
+  auto r2 = invertedIndex.termListUnionByDocNames(documentsHandler, firstWord, secondWord);
   std::cout << "r2: ";
   printVecS(r2);
-  auto r2_ = invertedIndex.termListUnion(documentsHandler, "SI", "UNO");
+  auto r2_ = invertedIndex.termListUnion(documentsHandler, firstWord, secondWord);
   std::cout << "r2_: ";
   printVecI(r2_);
 
