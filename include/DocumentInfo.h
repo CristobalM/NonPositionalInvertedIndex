@@ -20,14 +20,15 @@ class DocumentInfo {
   int words_count;
   std::string filename;
 
-  inline static const std::regex WORD_REGEX = std::regex("([^\\s]+)");;
+  //inline static const std::string WORD_REGEX_STR = "([^\\s]+)";
+  //inline static const std::regex WORD_REGEX = std::regex(WORD_REGEX_STR);;
 
   static inline bool hasKey(std::unordered_map<std::string, int> &map_, const std::string &key);
 
 public:
   explicit DocumentInfo(const std::string &filename);
 
-  void readDocument();
+  void readDocument(const std::regex &word_regex);
 
   std::vector<std::pair<std::string, int>> &getWordsFreqPairs();
 

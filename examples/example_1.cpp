@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
   std::string word2 = argv[3];
 
   std::cout << "Documents directory: " << dir_path << std::endl;
-  DocumentsHandler documentsHandler(true);
+  DocumentsHandler documentsHandler;
 
   documentsHandler.initDocumentsFromDirectory(dir_path);
   documentsHandler.scanWords();

@@ -28,10 +28,13 @@ class DocumentsHandler {
   int last_assigned_int;
   bool clean_on_scan;
 
+  std::regex word_regex;
+
+
   bool wordExists(const std::string &word);
 
 public:
-  DocumentsHandler(bool clean_on_scan);
+  DocumentsHandler(bool clean_on_scan = true, const std::string &word_regex_str = "([^\\s]+)");
 
   void initDocumentsFromDirectory(const std::string &directory_path);
 

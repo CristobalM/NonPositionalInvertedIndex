@@ -5,7 +5,8 @@
 #include <cassert>
 #include "DocumentsHandler.h"
 
-DocumentsHandler::DocumentsHandler(bool clean_on_scan) : clean_on_scan(clean_on_scan), last_assigned_int(0) {}
+DocumentsHandler::DocumentsHandler(bool clean_on_scan, const std::string &word_regex_str) :
+clean_on_scan(clean_on_scan), last_assigned_int(0), word_regex(word_regex_str) {}
 
 void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_path) {
   auto dir_iterator = fs::directory_iterator(directory_path);
@@ -19,7 +20,7 @@ void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_p
 void DocumentsHandler::scanWords() {
   for (auto i = 0; i < documents.size(); i++) {
     auto &document = *documents[i];
-    document.readDocument();
+    document.readDocument(word_regex);
     for (auto &word_freqs_pair : document.getWordsFreqPairs()) {
       auto &word = word_freqs_pair.first;
       auto freq = word_freqs_pair.second;

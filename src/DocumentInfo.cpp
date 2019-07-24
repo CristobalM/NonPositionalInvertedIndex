@@ -4,7 +4,7 @@
 
 #include "DocumentInfo.h"
 
-void DocumentInfo::readDocument() {
+void DocumentInfo::readDocument(const std::regex &word_regex) {
   std::unordered_map<std::string, int> word_count;
   std::vector<std::string> unique_words;
 
@@ -15,7 +15,7 @@ void DocumentInfo::readDocument() {
   while (std::getline(file, line)) {
     std::smatch sm;
 
-    for (auto r_it = std::sregex_iterator(line.begin(), line.end(), WORD_REGEX); r_it != std::sregex_iterator(); r_it++) {
+    for (auto r_it = std::sregex_iterator(line.begin(), line.end(), word_regex); r_it != std::sregex_iterator(); r_it++) {
       auto match = *r_it;
       auto word = match.str(0);
       if (!hasKey(word_count, word)) {
