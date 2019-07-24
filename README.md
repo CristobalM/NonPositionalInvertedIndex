@@ -24,5 +24,4 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 
 ### To do
 
-* Group terms by significance
-* Compare to the non-succinct analogous structure
+* Compare to another inverted index
