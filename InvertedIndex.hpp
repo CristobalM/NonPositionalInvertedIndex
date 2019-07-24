@@ -248,11 +248,11 @@ public:
     std::unordered_map<uint, bool> foundTerms;
 
     inline bool failCondition(TraversalNode &currentTNode){
-      auto cond = bothOutOfBounds(currentTNode);
       first_fail = firstOutOfBounds(currentTNode);
       second_fail = secondOutOfBounds(currentTNode);
 
-      return cond;
+      return first_fail && second_fail; // bothOutOfBounds
+
     }
     inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
                                  uint *first_term_left_idx, uint *first_term_right_idx,
@@ -354,12 +354,11 @@ public:
 
     auto root = wtHandler->getRoot();
     uint left_symbol_root = 0u;
-    //uint right_symbol_root = alphabet_sz - 1;
 
     auto lg2 = std::log2(alphabet_sz);
     auto lg2u = (uint)lg2;
     uint greaterPowerOf2 = lg2u + (lg2 > lg2u ? 1u : 0u);
-    //uint m = 1u << (greaterPowerOf2);
+
     uint right_symbol_root =  (1u << (greaterPowerOf2)) - 1;
 
     traversalStack.push({left_symbol_root, right_symbol_root,
@@ -424,7 +423,6 @@ public:
       traversalStack.push(std::move(traversal_node_left));
 
     }
-
 
     return intersection_result;
   }
