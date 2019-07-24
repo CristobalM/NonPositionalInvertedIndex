@@ -33,7 +33,7 @@ void DocumentInfo::readDocument(const std::regex &word_regex) {
   file.close();
 }
 
-DocumentInfo::DocumentInfo(const std::string &filename) : filename(filename), words_count(0){
+DocumentInfo::DocumentInfo(const std::string &filename) : filename(filename){
 }
 
 std::vector<std::pair<std::string, int>> &DocumentInfo::getWordsFreqPairs() {

@@ -49,6 +49,7 @@ public:
 
   inline uint select(uint i) {
     static_assert(always_false<BVGog>::value, "Calling select on NullSelect");
+    return 0;
   }
 };
 
@@ -59,6 +60,7 @@ public:
 
   inline uint rank(uint i) {
     static_assert(always_false<BVGog>::value, "Calling rank on NullRank");
+    return 0;
   }
 };
 
@@ -71,16 +73,15 @@ class BVHGog {
   using Sel0 = Select0Support<GBV, 0>;
   using Sel1 = Select1Support<GBV, 1>;
 
-  GBV bv;
-
   std::unique_ptr<Rk> rankSupport;
   std::unique_ptr<Sel0> select0Support;
   std::unique_ptr<Sel1> select1Support;
 
-  bool structures_built;
-
   uint bv_size;
 
+  GBV bv;
+
+  bool structures_built;
   uint nofzeros;
   uint nofones;
 

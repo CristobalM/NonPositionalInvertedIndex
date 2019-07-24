@@ -39,10 +39,7 @@ int main(int argc, char **argv) {
   auto secondSI = invertedIndex.ithDocName(documentsHandler, wordToQuery, idx_to_query);
   std::cout << "#" << idx_to_query << " " << wordToQuery << ": " << secondSI << std::endl;
 
-  auto &wtHandler = invertedIndex.getWTHandler();
-  auto &internalWT = wtHandler.getInternalStructure();
-
-  std::cout << "Term list intersection\n";
+  std::cout << "Pairwise term operations\n";
 
   auto &firstWord = word1;
   auto &secondWord = word2;
@@ -66,7 +63,7 @@ int main(int argc, char **argv) {
 
   std::cout << "\n\nDocument names: " << std::endl;
   const auto &documentNames = documentsHandler.getDocumentNames();
-  for(int i = 0; i < documentNames.size(); i++){
+  for(auto i = 0ul; i < documentNames.size(); i++){
     std::cout << i << ": " << documentNames[i] << std::endl;
   }
 

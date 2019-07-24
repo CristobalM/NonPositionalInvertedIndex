@@ -216,7 +216,7 @@ private:
     if (term_idx == -1) {
       return 0;
     }
-    if (!(term_idx >= 1 && term_idx < word_idx_mapping.size())) {
+    if (!(term_idx >= 1 && term_idx < (int)word_idx_mapping.size())) {
       throw std::runtime_error("term idx out of range: " +
                                std::to_string(term_idx) +
                                ". Range: [1, " + std::to_string(word_idx_mapping.size()) + ")");
@@ -229,7 +229,7 @@ private:
     if (term_idx == -1) {
       return 0;
     }
-    if (!(term_idx >= 1 && term_idx < word_idx_mapping.size())) {
+    if (!(term_idx >= 1 && term_idx < (int)word_idx_mapping.size())) {
       throw std::runtime_error("term idx out of range: " +
                                std::to_string(term_idx) +
                                ". Range: [1, " + std::to_string(word_idx_mapping.size()) + ")");
