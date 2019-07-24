@@ -363,7 +363,7 @@ private:
 
 
   template<class TraversalOperation>
-  std::vector<int> treeTraversal(uint termAIdx, uint termBIdx) { // AND
+  std::vector<int> treeTraversal(uint termAIdx, uint termBIdx) {
     std::vector<int> intersection_result;
 
     auto[itA, ftA] = getTermInterval(termAIdx);
