@@ -46,8 +46,6 @@ public:
   explicit WTHGog(std::vector<AlphabetType> &inputWT) {
     auto iv = viToIv(inputWT);
     sdsl::construct_im(wt, iv);
-
-    debugWTPrint(inputWT);
   }
 
   inline uint access(uint i) {
@@ -66,14 +64,8 @@ public:
   }
 
   void debugWTPrint(std::vector<AlphabetType> &inputWT) {
-    std::cout << " WT INPUT SEQUENCE" << std::endl;
-    for (AlphabetType i = 0; i < inputWT.size(); i++) {
-      std::cout << (uint) inputWT[i] << " ";
-    }
-    std::cout << std::endl;
     std::cout << "DEBUG WT \n"
               << wt << std::endl;
-
   }
 
   WTType &getInternalStructure() {
@@ -118,8 +110,6 @@ public:
     return {std::move(tmp_exp[0]), std::move(tmp_exp[1])};
   }
 
-
 };
-
 
 #endif //NONPOSINVIDX_WTHGOG_HPP

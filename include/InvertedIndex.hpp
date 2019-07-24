@@ -136,7 +136,72 @@ public:
   }
 
 
+  /** Get the number of documents term_idx appears in **/
+  inline uint documentFrequency(WordToDocFreqMap &wordToDocFreqMap, const std::string &term_s) {
+    auto word_idx = wordToDocFreqMap.getWordIdxByName(term_s);
+    return documentFrequency(word_idx);
+  }
 
+  /** Get the ith document in which term_idx appears in, ordered by RelevanceOrder **/
+  inline uint ithDoc(WordToDocFreqMap &wordToDocFreqMap, const std::string &term_s, int i) {
+    auto word_idx = wordToDocFreqMap.getWordIdxByName(term_s);
+    return ithDoc(word_idx, i);
+  }
+
+  /** Get the list of documents paths where both term_a and term_b appear **/
+  std::vector<std::string> termListIntersectionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
+                                                          const std::string &term_a, const std::string &term_b) {
+    auto indexes_result = termListIntersection(wordToDocFreqMap, term_a, term_b);
+    std::vector<std::string> result;
+
+    for (auto &doc_idx : indexes_result) {
+      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
+    }
+    return result;
+  }
+
+  /** Get the list of documents paths where any of term_a or term_b appear **/
+  std::vector<std::string> termListUnionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
+                                                   const std::string &term_a, const std::string &term_b) {
+    auto indexes_result = termListUnion(wordToDocFreqMap, term_a, term_b);
+    std::vector<std::string> result;
+
+    for (auto &doc_idx : indexes_result) {
+      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
+    }
+    return result;
+  }
+
+  /** Get the list of documents indexes where both term_a and term_b appear **/
+  std::vector<int> termListIntersection(WordToDocFreqMap &wordToDocFreqMap,
+                                        const std::string &term_a, const std::string &term_b) {
+    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
+    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
+    auto inner_idx_a = word_idx_mapping[term_a_idx];
+    auto inner_idx_b = word_idx_mapping[term_b_idx];
+
+    return termListIntersection(inner_idx_a, inner_idx_b);
+  }
+
+  /** Get the list of documents indexes where any of term_a or term_b appear **/
+  std::vector<int> termListUnion(WordToDocFreqMap &wordToDocFreqMap,
+                                 const std::string &term_a, const std::string &term_b) {
+    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
+    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
+    auto inner_idx_a = word_idx_mapping[term_a_idx];
+    auto inner_idx_b = word_idx_mapping[term_b_idx];
+
+    return termListUnion(inner_idx_a, inner_idx_b);
+  }
+
+
+  WTHandler &getWTHandler() {
+    return *wtHandler;
+  }
+
+
+
+private:
   std::pair<uint, uint> getTermInterval(int term_idx) {
     auto inner_idx = word_idx_mapping[term_idx];
     auto it = terms_separator->select_1(inner_idx);
@@ -171,65 +236,6 @@ public:
 
     wtHandler->access(it + i - 1);
   }
-
-  inline uint documentFrequency(WordToDocFreqMap &wordToDocFreqMap, const std::string &term_s) {
-    auto word_idx = wordToDocFreqMap.getWordIdxByName(term_s);
-    return documentFrequency(word_idx);
-  }
-
-  inline uint ithDoc(WordToDocFreqMap &wordToDocFreqMap, const std::string &term_s, int i) {
-    auto word_idx = wordToDocFreqMap.getWordIdxByName(term_s);
-    return ithDoc(word_idx, i);
-  }
-
-  WTHandler &getWTHandler() {
-    return *wtHandler;
-  }
-
-  std::vector<int> termListIntersection(WordToDocFreqMap &wordToDocFreqMap,
-                                        const std::string &term_a, const std::string &term_b) {
-    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
-    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
-    auto inner_idx_a = word_idx_mapping[term_a_idx];
-    auto inner_idx_b = word_idx_mapping[term_b_idx];
-
-    return termListIntersection(inner_idx_a, inner_idx_b);
-  }
-
-  std::vector<std::string> termListIntersectionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
-                                                          const std::string &term_a, const std::string &term_b) {
-    auto indexes_result = termListIntersection(wordToDocFreqMap, term_a, term_b);
-    std::vector<std::string> result;
-
-    for (auto &doc_idx : indexes_result) {
-      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
-    }
-    return result;
-  }
-
-
-  std::vector<int> termListUnion(WordToDocFreqMap &wordToDocFreqMap,
-                                 const std::string &term_a, const std::string &term_b) {
-    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
-    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
-    auto inner_idx_a = word_idx_mapping[term_a_idx];
-    auto inner_idx_b = word_idx_mapping[term_b_idx];
-
-    return termListUnion(inner_idx_a, inner_idx_b);
-  }
-
-  std::vector<std::string> termListUnionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
-                                                   const std::string &term_a, const std::string &term_b) {
-    auto indexes_result = termListUnion(wordToDocFreqMap, term_a, term_b);
-    std::vector<std::string> result;
-
-    for (auto &doc_idx : indexes_result) {
-      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
-    }
-    return result;
-  }
-
-private:
 
   using WTNode = typename WTHandler::WTNode;
   struct TraversalNode {
