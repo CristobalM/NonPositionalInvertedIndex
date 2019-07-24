@@ -25,16 +25,15 @@ class DocumentsHandler {
 
   std::vector<std::string> documentsNames;
 
-  int last_assigned_int;
   bool clean_on_scan;
-
+  int last_assigned_int;
   std::regex word_regex;
 
 
   bool wordExists(const std::string &word);
 
 public:
-  DocumentsHandler(bool clean_on_scan = true, const std::string &word_regex_str = "([^\\s]+)");
+  explicit DocumentsHandler(bool clean_on_scan = true, const std::string &word_regex_str = "([^\\s]+)");
 
   void initDocumentsFromDirectory(const std::string &directory_path);
 

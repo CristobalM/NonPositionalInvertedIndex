@@ -18,7 +18,7 @@ void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_p
 }
 
 void DocumentsHandler::scanWords() {
-  for (auto i = 0; i < documents.size(); i++) {
+  for (unsigned long i = 0; i < documents.size(); i++) {
     auto &document = *documents[i];
     document.readDocument(word_regex);
     for (auto &word_freqs_pair : document.getWordsFreqPairs()) {
@@ -81,6 +81,6 @@ uint DocumentsHandler::getUniqueDocsCount() {
 }
 
 std::string DocumentsHandler::getDocNameByIdx(int doc_idx) {
-  assert(doc_idx >= 0 && doc_idx < documentsNames.size());
+  assert(doc_idx >= 0 && (unsigned long)doc_idx < documentsNames.size());
   return documentsNames[doc_idx];
 }
