@@ -8,6 +8,7 @@
 #include <memory>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
 
 #include <stack>
 
@@ -197,6 +198,103 @@ public:
     WTNode wt_node;
   };
 
+  static inline bool reachedSymbol(TraversalNode &currentTNode) {
+    return currentTNode.left_symbol == currentTNode.right_symbol;
+  }
+
+  static inline bool anyOutOfBounds(TraversalNode &currentTNode) {
+    return firstOutOfBounds(currentTNode) || secondOutOfBounds(currentTNode);
+  }
+
+  static inline bool bothOutOfBounds(TraversalNode &currentTNode) {
+    return firstOutOfBounds(currentTNode) && secondOutOfBounds(currentTNode);
+  }
+
+  static inline bool firstOutOfBounds(TraversalNode &currentTNode) {
+    return currentTNode.first_term_left_idx > currentTNode.first_term_right_idx;
+  }
+
+  static inline bool secondOutOfBounds(TraversalNode &currentTNode) {
+    return currentTNode.second_term_left_idx > currentTNode.second_term_right_idx;
+  }
+
+
+  struct AndOperation{
+    static inline bool failCondition(TraversalNode &currentTNode){
+      return anyOutOfBounds(currentTNode);
+    }
+    static inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
+            uint *first_term_left_idx, uint *first_term_right_idx,
+            uint *second_term_left_idx, uint *second_term_right_idx){
+      *first_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                     currentTNode.first_term_left_idx - 1) + 1;
+      *first_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                      currentTNode.first_term_right_idx);
+
+      *second_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                      currentTNode.second_term_left_idx - 1) + 1;
+      *second_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                       currentTNode.second_term_right_idx);
+    }
+
+    static inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode){
+      intersection_result.push_back(currentTNode.left_symbol);
+    }
+  };
+
+  struct OrOperation{
+    bool first_fail, second_fail;
+    std::unordered_map<uint, bool> foundTerms;
+
+    inline bool failCondition(TraversalNode &currentTNode){
+      auto cond = bothOutOfBounds(currentTNode);
+      first_fail = firstOutOfBounds(currentTNode);
+      second_fail = secondOutOfBounds(currentTNode);
+
+      return cond;
+    }
+    inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
+                                 uint *first_term_left_idx, uint *first_term_right_idx,
+                                 uint *second_term_left_idx, uint *second_term_right_idx){
+
+      if(!first_fail){
+        *first_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                        currentTNode.first_term_left_idx - 1) + 1;
+        *first_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                         currentTNode.first_term_right_idx);
+      }
+      else{
+        *first_term_left_idx = 1;
+        *first_term_right_idx = 0;
+      }
+      if(!second_fail){
+        *second_term_left_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                         currentTNode.second_term_left_idx - 1) + 1;
+        *second_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
+                                                          currentTNode.second_term_right_idx);
+      }
+      else{
+        *second_term_left_idx = 1;
+        *second_term_right_idx = 0;
+      }
+    }
+
+    inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode){
+      auto term = currentTNode.left_symbol;
+      if(foundTerms.find(term) == foundTerms.end()){
+        foundTerms[term] = true;
+        intersection_result.push_back(currentTNode.left_symbol);
+      }
+
+    }
+
+  };
+
+
+  inline std::vector<int> termListIntersection(uint termAIdx, uint termBIdx){
+    return treeTraversal<AndOperation>(termAIdx, termBIdx);
+  }
+
   std::vector<int> termListIntersection(WordToDocFreqMap &wordToDocFreqMap,
                                         const std::string &term_a, const std::string &term_b) {
     auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
@@ -218,8 +316,34 @@ public:
     return result;
   }
 
+  inline std::vector<int> termListUnion(uint termAIdx, uint termBIdx){
+    return treeTraversal<OrOperation>(termAIdx, termBIdx);
+  }
 
-  std::vector<int> termListIntersection(uint termAIdx, uint termBIdx) { // AND
+  std::vector<int> termListUnion(WordToDocFreqMap &wordToDocFreqMap,
+                                         const std::string &term_a, const std::string &term_b) {
+    auto term_a_idx = wordToDocFreqMap.getWordIdxByName(term_a);
+    auto term_b_idx = wordToDocFreqMap.getWordIdxByName(term_b);
+    auto inner_idx_a = word_idx_mapping[term_a_idx];
+    auto inner_idx_b = word_idx_mapping[term_b_idx];
+
+    return termListUnion(inner_idx_a, inner_idx_b);
+  }
+
+  std::vector<std::string> termListUnionByDocNames(WordToDocFreqMap &wordToDocFreqMap,
+                                                           const std::string &term_a, const std::string &term_b) {
+    auto indexes_result = termListUnion(wordToDocFreqMap, term_a, term_b);
+    std::vector<std::string> result;
+
+    for (auto &doc_idx : indexes_result) {
+      result.push_back(wordToDocFreqMap.getDocNameByIdx(doc_idx));
+    }
+    return result;
+  }
+
+
+  template<class TraversalOperation>
+  std::vector<int> treeTraversal(uint termAIdx, uint termBIdx) { // AND
     std::vector<int> intersection_result;
 
     auto[itA, ftA] = getTermInterval(termAIdx);
@@ -236,36 +360,29 @@ public:
                          itB, ftB,
                          root});
 
+    TraversalOperation traversalOperation;
 
     while (!traversalStack.empty()) {
       auto &currentTNode = traversalStack.top();
 
-      if (currentTNode.first_term_left_idx > currentTNode.first_term_right_idx ||
-          currentTNode.second_term_left_idx > currentTNode.second_term_right_idx
-              ) {
+      if (traversalOperation.failCondition(currentTNode)) {
         traversalStack.pop();
-
         continue;
       }
 
-      if (currentTNode.left_symbol == currentTNode.right_symbol) {
-        intersection_result.push_back(currentTNode.left_symbol);
+      if (reachedSymbol(currentTNode)) {
+        traversalOperation.reachedSymbolAction(intersection_result, currentTNode);
         traversalStack.pop();
-
         continue;
       }
 
       uint m = (currentTNode.left_symbol + currentTNode.right_symbol) >> 1u;
 
-      auto first_term_left_idx = wtHandler->innerBVRank_0(currentTNode.wt_node,
-                                                          currentTNode.first_term_left_idx - 1) + 1;
-      auto first_term_right_idx = wtHandler->innerBVRank_0(currentTNode.wt_node,
-                                                           currentTNode.first_term_right_idx);
+      uint first_term_left_idx, first_term_right_idx, second_term_left_idx, second_term_right_idx;
 
-      auto second_term_left_idx = wtHandler->innerBVRank_0(currentTNode.wt_node,
-                                                           currentTNode.second_term_left_idx - 1) + 1;
-      auto second_term_right_idx = wtHandler->innerBVRank_0(currentTNode.wt_node,
-                                                            currentTNode.second_term_right_idx);
+      traversalOperation.setTermVariables(*wtHandler, currentTNode, &first_term_left_idx, &first_term_right_idx,
+              &second_term_left_idx, &second_term_right_idx);
+
 
 
       WTNode left_child, right_child;

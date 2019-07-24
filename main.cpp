@@ -73,7 +73,9 @@ int main(int argc, char **argv) {
   std::cout << "r1: ";
   printVec(r1);
 
-
+  auto r2 = invertedIndex.termListUnionByDocNames(documentsHandler, "SI", "UNO");
+  std::cout << "r2: ";
+  printVec(r2);
 
 
 /*

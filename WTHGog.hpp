@@ -102,7 +102,6 @@ public:
       throw std::runtime_error("innerBVRank_0 idx out of bounds: 1 <= " +
                                std::to_string(idx) + " <= " + std::to_string(wtNode.size));
     }
-    //auto real_idx = idx - 1 + wtNode.offset;
     return idx - innerBVRank(wtNode, idx);
   }
 
