@@ -15,8 +15,7 @@
 
 #include <stdexcept>
 
-#include "BVHGog.hpp"
-
+#include <vector>
 
 // Term-frequency order
 template<class WordToDocFreqMap>
