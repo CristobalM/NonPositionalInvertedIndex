@@ -4,6 +4,8 @@ project(NonPosInvIdx)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
+
 # SDSL install location
 include_directories(~/include)
 link_directories(~/lib)

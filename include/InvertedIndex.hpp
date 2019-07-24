@@ -242,7 +242,7 @@ private:
       " document does not exist for term with index " + std::to_string(term_idx));
     }
 
-    wtHandler->access(it + i - 1);
+    return wtHandler->access(it + i - 1);
   }
 
   using WTNode = typename WTHandler::WTNode;
@@ -305,7 +305,8 @@ private:
   };
 
   struct OrOperation {
-    bool first_fail, second_fail;
+    bool first_fail = false;
+    bool second_fail = false;
     std::unordered_map<uint, bool> foundTerms;
 
     inline bool failCondition(TraversalNode &currentTNode) {
