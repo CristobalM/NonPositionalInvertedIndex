@@ -327,7 +327,7 @@ private:
         *first_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
                                                          currentTNode.first_term_right_idx);
       } else {
-        *first_term_left_idx = 1;
+        *first_term_left_idx = currentTNode.wt_node.size + 1;
         *first_term_right_idx = 0;
       }
       if (!second_fail) {
@@ -336,7 +336,7 @@ private:
         *second_term_right_idx = wt_handler.innerBVRank_0(currentTNode.wt_node,
                                                           currentTNode.second_term_right_idx);
       } else {
-        *second_term_left_idx = 1;
+        *second_term_left_idx = currentTNode.wt_node.size + 1;
         *second_term_right_idx = 0;
       }
     }
