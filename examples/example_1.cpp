@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include "NonPosInvIdx.h"
+#include "DocumentsHandler.h"
 
 template<class vtype>
 void printVec(std::vector<vtype> &v){
