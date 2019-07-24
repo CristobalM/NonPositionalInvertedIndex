@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <iostream>
 #include <unordered_map>
+#include <cmath>
 
 #include <stack>
 
@@ -353,7 +354,13 @@ public:
 
     auto root = wtHandler->getRoot();
     uint left_symbol_root = 0u;
-    uint right_symbol_root = alphabet_sz - 1;
+    //uint right_symbol_root = alphabet_sz - 1;
+
+    auto lg2 = std::log2(alphabet_sz);
+    auto lg2u = (uint)lg2;
+    uint greaterPowerOf2 = lg2u + (lg2 > lg2u ? 1u : 0u);
+    //uint m = 1u << (greaterPowerOf2);
+    uint right_symbol_root =  (1u << (greaterPowerOf2)) - 1;
 
     traversalStack.push({left_symbol_root, right_symbol_root,
                          itA, ftA,
@@ -361,6 +368,7 @@ public:
                          root});
 
     TraversalOperation traversalOperation;
+
 
     while (!traversalStack.empty()) {
       auto &currentTNode = traversalStack.top();
@@ -376,7 +384,14 @@ public:
         continue;
       }
 
+      if(wtHandler->isLeaf(currentTNode.wt_node)){
+        traversalStack.pop();
+        continue;
+      }
+
       uint m = (currentTNode.left_symbol + currentTNode.right_symbol) >> 1u;
+
+
 
       uint first_term_left_idx, first_term_right_idx, second_term_left_idx, second_term_right_idx;
 
@@ -384,14 +399,7 @@ public:
               &second_term_left_idx, &second_term_right_idx);
 
 
-
-      WTNode left_child, right_child;
-
-      if (!wtHandler->isLeaf(currentTNode.wt_node)) {
-        auto children = wtHandler->getChildren(currentTNode.wt_node);
-        left_child = children.first;
-        right_child = children.second;
-      }
+      auto [left_child, right_child] = wtHandler->getChildren(currentTNode.wt_node);
 
 
       TraversalNode traversal_node_left = {

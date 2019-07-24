@@ -60,7 +60,13 @@ int main(int argc, char **argv) {
 
   std::cout << "Term list intersection\n";
 
-  auto printVec = [](std::vector<std::string> &inputV){
+  auto printVecS = [](std::vector<std::string> &inputV){
+    for(auto &val : inputV){
+      std::cout << val << " ";
+    }
+    std::cout << std::endl;
+  };
+  auto printVecI = [](std::vector<int> &inputV){
     for(auto &val : inputV){
       std::cout << val << " ";
     }
@@ -70,13 +76,25 @@ int main(int argc, char **argv) {
 
 
   auto r1 = invertedIndex.termListIntersectionByDocNames(documentsHandler, "SI", "UNO");
+  auto r1_ = invertedIndex.termListIntersection(documentsHandler, "SI", "UNO");
   std::cout << "r1: ";
-  printVec(r1);
+  printVecS(r1);
+  std::cout << "r1_: ";
+  printVecI(r1_);
 
   auto r2 = invertedIndex.termListUnionByDocNames(documentsHandler, "SI", "UNO");
   std::cout << "r2: ";
-  printVec(r2);
+  printVecS(r2);
+  auto r2_ = invertedIndex.termListUnion(documentsHandler, "SI", "UNO");
+  std::cout << "r2_: ";
+  printVecI(r2_);
 
+
+  std::cout << "Document names: " << std::endl;
+  const auto &documentNames = documentsHandler.getDocumentNames();
+  for(int i = 0; i < documentNames.size(); i++){
+    std::cout << i << ": " << documentNames[i] << std::endl;
+  }
 
 /*
 

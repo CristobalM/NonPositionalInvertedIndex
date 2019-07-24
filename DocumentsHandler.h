@@ -49,6 +49,10 @@ public:
   unsigned long getUniqueWordsCount();
 
   uint getUniqueDocsCount();
+
+  const std::vector<std::string> &getDocumentNames() const{
+    return documentsNames;
+  }
 };
 
 
