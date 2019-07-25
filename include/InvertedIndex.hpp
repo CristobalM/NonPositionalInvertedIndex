@@ -374,9 +374,7 @@ private:
     auto root = wtHandler->getRoot();
     uint left_symbol_root = 0u;
 
-    auto lg2 = std::log2(alphabet_sz);
-    auto lg2u = (uint) lg2;
-    uint greaterPowerOf2 = lg2u + (lg2 > lg2u ? 1u : 0u);
+    auto greaterPowerOf2 = (uint)std::ceil(std::log2(alphabet_sz));  //lg2u + (lg2 > lg2u ? 1u : 0u);
 
     uint right_symbol_root = (1u << (greaterPowerOf2)) - 1;
 
@@ -388,21 +386,20 @@ private:
     TraversalOperation traversalOperation;
 
     while (!traversalStack.empty()) {
-      auto &currentTNode = traversalStack.top();
+      auto currentTNode = std::move(traversalStack.top());
+      traversalStack.pop();
+
 
       if (traversalOperation.failCondition(currentTNode)) {
-        traversalStack.pop();
         continue;
       }
 
       if (reachedSymbol(currentTNode)) {
         traversalOperation.reachedSymbolAction(intersection_result, currentTNode);
-        traversalStack.pop();
         continue;
       }
 
       if (wtHandler->isLeaf(currentTNode.wt_node)) {
-        traversalStack.pop();
         continue;
       }
 
@@ -432,7 +429,6 @@ private:
               right_child
       };
 
-      traversalStack.pop();
       traversalStack.push(std::move(traversal_node_right));
       traversalStack.push(std::move(traversal_node_left));
     }
