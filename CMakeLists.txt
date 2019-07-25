@@ -43,3 +43,5 @@ target_link_libraries(NonPosInvIdx sdsl stdc++fs)
 add_executable(example_1 examples/example_1.cpp)
 target_link_libraries(example_1 NonPosInvIdx)
 
+
+add_subdirectory(comparison/mifluz)
