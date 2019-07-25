@@ -23,11 +23,9 @@ public:
   uint32_t tree_rank(uint i) {
     return m_tree_rank.rank(i);
   }
-
-  //WtIntGogWTreeRank(): sdsl::wt_int<>(){}
 };
 
-template<uint8_t ivSZ = _DEFAULT_IV_SZ, typename AlphabetType = uint32_t>
+template<typename AlphabetType = uint32_t>
 class WTHGog {
   using WTType = WtIntGogWTreeRank;
   WTType wt;
