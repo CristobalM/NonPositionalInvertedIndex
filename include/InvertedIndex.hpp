@@ -20,7 +20,7 @@
 #include "TermOrdering.hpp"
 #include "TermGrouping.hpp"
 
-/** Main Inverted Index structure, built from WordToDocFreqMap.
+/** Inverted Index structure, built from WordToDocFreqMap.
  * Has AND, OR operations **/
 template<class WordToDocFreqMap,
         class WTHandler,
