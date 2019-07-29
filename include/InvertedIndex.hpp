@@ -27,23 +27,6 @@ template<class WordToDocFreqMap,
         class RelevanceDocOrder = TFDocOrder<WordToDocFreqMap>,
         class TermGrouping = AnyTermGrouping<BVHandler>>
 class InvertedIndex {
-  std::unique_ptr<WTHandler> wtHandler;
-  std::unique_ptr<BVHandler> terms_separator;
-  std::vector<int> word_idx_mapping;
-
-  uint alphabet_sz;
-
-
-  void buildInvertedIndex(WordToDocFreqMap &wordToDocFreqMap) {
-    auto orderedByRelevance = RelevanceDocOrder::order(wordToDocFreqMap);
-    auto grouping = TermGrouping::group(orderedByRelevance);
-    auto &raw_result_sequence = grouping.raw_result_sequence;
-    word_idx_mapping = std::move(grouping.word_idx_mapping);
-    terms_separator = std::move(grouping.terms_separator);
-    wtHandler = std::make_unique<WTHandler>(raw_result_sequence);
-
-  }
-
 public:
   explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap) : alphabet_sz(
           (uint) wordToDocFreqMap.getUniqueDocsCount()) {
@@ -122,6 +105,23 @@ public:
 
 
 private:
+  std::unique_ptr<WTHandler> wtHandler;
+  std::unique_ptr<BVHandler> terms_separator;
+  std::vector<int> word_idx_mapping;
+
+  uint alphabet_sz;
+
+
+  void buildInvertedIndex(WordToDocFreqMap &wordToDocFreqMap) {
+    auto orderedByRelevance = RelevanceDocOrder::order(wordToDocFreqMap);
+    auto grouping = TermGrouping::group(orderedByRelevance);
+    auto &raw_result_sequence = grouping.raw_result_sequence;
+    word_idx_mapping = std::move(grouping.word_idx_mapping);
+    terms_separator = std::move(grouping.terms_separator);
+    wtHandler = std::make_unique<WTHandler>(raw_result_sequence);
+
+  }
+
   std::pair<uint, uint> getTermInterval(int term_idx) {
     auto inner_idx = word_idx_mapping[term_idx];
     auto it = terms_separator->select_1(inner_idx);
