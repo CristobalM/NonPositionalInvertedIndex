@@ -13,11 +13,13 @@ link_directories(~/lib)
 
 include_directories(include)
 set(INCLUDES_FILES
+        TermOrdering.hpp
+        TermGrouping.hpp
         InvertedIndex.hpp
         WTHGog.hpp
         BVHGog.hpp
-        DocumentInfo.h
-        DocumentsHandler.h)
+        DocumentInfo.hpp
+        DocumentsHandler.hpp)
 
 set(SOURCES_FILES
         DocumentInfo.cpp
