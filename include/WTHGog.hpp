@@ -13,6 +13,9 @@
 
 #include "BVHGog.hpp"
 
+/** Auxiliary class which adds a new operation to the sdsl::wt_int class.
+ * This is required to access the internal bit vectors of the wavelet tree (that are concatenated in a single bit vector)
+ * **/
 class WtIntGogWTreeRank : public sdsl::wt_int<> {
 public:
   using sdsl::wt_int<>::wt_int;
@@ -22,6 +25,7 @@ public:
   }
 };
 
+/** Wrapper class for SDSL's wavelet tree **/
 template<typename AlphabetType = uint32_t>
 class WTHGog {
   using WTType = WtIntGogWTreeRank;

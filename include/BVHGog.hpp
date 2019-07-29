@@ -64,6 +64,7 @@ public:
   }
 };
 
+/** Wrapper class for SDSL's bit vector with rank and select (0, 1) support **/
 template<template<class> class RankSupport = RankSupportConstantGog,
         template<class, uint8_t> class Select0Support = SelectSupportConstantGog,
         template<class, uint8_t> class Select1Support = SelectSupportConstantGog>

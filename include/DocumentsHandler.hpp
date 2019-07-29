@@ -17,6 +17,8 @@
 #include "DocumentInfo.hpp"
 
 namespace fs = std::experimental::filesystem;
+
+/** Simple class for handling documents and can be used by InvertedIndex to build its structure **/
 class DocumentsHandler {
   std::vector<std::unique_ptr<DocumentInfo>> documents;
   std::unordered_map<std::string, int> words_map;

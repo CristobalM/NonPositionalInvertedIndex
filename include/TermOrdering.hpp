@@ -5,7 +5,8 @@
 #ifndef NONPOSINVIDX_TERMORDERING_HPP
 #define NONPOSINVIDX_TERMORDERING_HPP
 
-// Term-frequency order
+/** Term frequency order.
+ * This is a concrete implementation for the ordering of documents inside a term range in the wavelet tree **/
 template<class WordToDocFreqMap>
 struct TFDocOrder {
 

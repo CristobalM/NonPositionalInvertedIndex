@@ -5,7 +5,7 @@
 #ifndef NONPOSINVIDX_TERMGROUPING_H
 #define NONPOSINVIDX_TERMGROUPING_H
 
-
+/** Structure to store the result of term grouping in a WT **/
 template<class BVHandler, typename AlphabetType = uint32_t>
 struct GroupedTerms {
   std::vector<AlphabetType> raw_result_sequence;
@@ -13,6 +13,7 @@ struct GroupedTerms {
   std::vector<int> word_idx_mapping;
 };
 
+/** Concrete implementation for no particular grouping of terms **/
 template<class BVHandler, typename AlphabetType = uint32_t>
 struct AnyTermGrouping {
   static void printVector(std::vector<AlphabetType> &v) {

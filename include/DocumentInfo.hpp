@@ -14,6 +14,7 @@
 #include <regex>
 #include <iostream>
 
+/** Class that is used to read a single document and extract word occurrences count from it **/
 class DocumentInfo {
   std::vector<std::pair<std::string, int>> words_freq_pairs;
 
