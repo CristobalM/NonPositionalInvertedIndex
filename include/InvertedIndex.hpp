@@ -29,8 +29,8 @@ template<class WordToDocFreqMap,
         class TermGrouping = AnyTermGrouping<BVHandler>>
 class InvertedIndex {
 public:
-  explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap) : alphabet_sz(
-          (uint) wordToDocFreqMap.getUniqueDocsCount()) {
+  explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap) :
+  alphabet_sz((uint) wordToDocFreqMap.getUniqueDocsCount()) {
     buildInvertedIndex(wordToDocFreqMap);
   }
 
@@ -98,7 +98,7 @@ public:
     return termListUnion(inner_idx_a, inner_idx_b);
   }
 
-
+  /** For debugging **/
   WTHandler &getWTHandler() {
     return *wtHandler;
   }
