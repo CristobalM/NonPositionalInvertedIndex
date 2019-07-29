@@ -1,0 +1,84 @@
+stop-words = "../lorem_ipsum_meta/lorem_ipsum/lemur-stopwords.txt"
+function-words = "../lorem_ipsum_meta/lorem_ipsum/function-words.txt"
+punctuation = "../lorem_ipsum_meta/lorem_ipsum/sentence-punctuation.txt"
+start-exceptions = "../lorem_ipsum_meta/lorem_ipsum/sentence-start-exceptions.txt"
+end-exceptions = "../lorem_ipsum_meta/lorem_ipsum/sentence-end-exceptions.txt"
+
+prefix = "../../examples/"
+libsvm-modules = "../../../../clones/meta/deps/libsvm-modules/"
+dataset = "lorem_ipsum"
+corpus = "corpus_config.toml"
+index = "lorem_ipsum_idx"
+
+
+indexer-ram-budget = 1024
+[diff]
+	substitute-penalty = 0.00000
+	remove-penalty = 0.00000
+	insert-penalty = 0.00000
+	base-penalty = 0.00000
+	n-value = 3
+	max-edits = 3
+[lda]
+	model-prefix = "lda-model"
+	topics = 4
+	beta = 1.00000
+	inference = "gibbs"
+	alpha = 1.00000
+	max-iters = 1000
+[sequence]
+	prefix = "perceptron-tagger"
+	corpus = "wsj"
+	treebank = "penn-treebank"
+	section-size = 99
+	test-sections = [22, 24]
+	train-sections = [0, 18]
+	dev-sections = [19, 21]
+[crf]
+	prefix = "crf"
+	corpus = "wsj"
+	treebank = "penn-treebank"
+	section-size = 99
+	test-sections = [22, 24]
+	train-sections = [0, 18]
+	dev-sections = [19, 21]
+[parser]
+	prefix = "parser"
+	corpus = "wsj"
+	treebank = "penn-treebank"
+	section-size = 99
+	test-sections = [23, 23]
+	train-sections = [2, 21]
+	dev-sections = [22, 22]
+[features]
+	method = "info-gain"
+	features-per-class = 20
+	prefix = "features"
+[embeddings]
+	vector-size = 50
+	prefix = "word-embeddings"
+	[embeddings.vocab]
+		max-size = 500000
+		min-count = 10
+	[[embeddings.filter]]
+		suppress-tags = true
+		type = "icu-tokenizer"
+	[[embeddings.filter]]
+		type = "lowercase"
+[ranker]
+	method = "bm25"
+	k3 = 500
+	b = 0.750000
+	k1 = 1.20000
+[[analyzers]]
+	filter = "default-unigram-chain"
+	method = "ngram-word"
+	ngram = 1
+[classifier]
+	method = "one-vs-all"
+	[classifier.base]
+		loss = "hinge"
+		method = "sgd"
+[regressor]
+	loss = "least-squares"
+	method = "sgd"
