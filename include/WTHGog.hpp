@@ -13,9 +13,6 @@
 
 #include "BVHGog.hpp"
 
-
-static const uint8_t _DEFAULT_IV_SZ = 32;
-
 class WtIntGogWTreeRank : public sdsl::wt_int<> {
 public:
   using sdsl::wt_int<>::wt_int;
