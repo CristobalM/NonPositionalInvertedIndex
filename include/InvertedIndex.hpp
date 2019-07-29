@@ -281,7 +281,7 @@ private:
 
   template<class TraversalOperation>
   std::vector<int> treeTraversal(uint termAIdx, uint termBIdx) {
-    std::vector<int> intersection_result;
+    std::vector<int> output;
 
     auto[itA, ftA] = getTermInterval(termAIdx);
     auto[itB, ftB] = getTermInterval(termBIdx);
@@ -312,7 +312,7 @@ private:
       }
 
       if (reachedSymbol(currentTNode)) {
-        traversalOperation.reachedSymbolAction(intersection_result, currentTNode);
+        traversalOperation.reachedSymbolAction(output, currentTNode);
         continue;
       }
 
@@ -350,7 +350,7 @@ private:
       traversalStack.push(std::move(traversal_node_left));
     }
 
-    return intersection_result;
+    return output;
   }
 };
 
