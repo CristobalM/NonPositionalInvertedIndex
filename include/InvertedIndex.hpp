@@ -19,6 +19,7 @@
 
 #include "TermOrdering.hpp"
 #include "TermGrouping.hpp"
+#include "SimpleStorage.hpp"
 
 /** Inverted Index structure, built from WordToDocFreqMap.
  * Has AND, OR operations **/
@@ -26,7 +27,8 @@ template<class WordToDocFreqMap,
         class WTHandler,
         class BVHandler,
         class RelevanceDocOrder = TFDocOrder<WordToDocFreqMap>,
-        class TermGrouping = AnyTermGrouping<BVHandler>>
+        class TermGrouping = AnyTermGrouping<BVHandler>,
+        class Storage = SimpleStorage>
 class InvertedIndex {
 public:
   explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap) :
@@ -112,6 +114,7 @@ private:
 
   uint alphabet_sz;
 
+  Storage storage;
 
   void buildInvertedIndex(WordToDocFreqMap &wordToDocFreqMap) {
     auto orderedByRelevance = RelevanceDocOrder::order(wordToDocFreqMap);
@@ -120,7 +123,6 @@ private:
     word_idx_mapping = std::move(grouping.word_idx_mapping);
     terms_separator = std::move(grouping.terms_separator);
     wtHandler = std::make_unique<WTHandler>(raw_result_sequence);
-
   }
 
   std::pair<uint, uint> getTermInterval(int term_idx) {
