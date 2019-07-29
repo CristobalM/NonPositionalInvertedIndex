@@ -3,7 +3,7 @@
 //
 
 #include <cassert>
-#include "DocumentsHandler.h"
+#include "DocumentsHandler.hpp"
 
 DocumentsHandler::DocumentsHandler(bool clean_on_scan, const std::string &word_regex_str) :
 clean_on_scan(clean_on_scan), last_assigned_int(0), word_regex(word_regex_str) {}

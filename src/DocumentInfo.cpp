@@ -2,7 +2,7 @@
 // Created by Cristobal Miranda, 2019
 //
 
-#include "DocumentInfo.h"
+#include "DocumentInfo.hpp"
 
 void DocumentInfo::readDocument(const std::regex &word_regex) {
   std::unordered_map<std::string, int> word_count;

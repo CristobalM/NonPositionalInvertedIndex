@@ -2,8 +2,8 @@
 // Created by Cristobal Miranda, 2019
 //
 
-#ifndef NONPOSINVIDX_DOCUMENTSHANDLER_H
-#define NONPOSINVIDX_DOCUMENTSHANDLER_H
+#ifndef NONPOSINVIDX_DOCUMENTSHANDLER_HPP
+#define NONPOSINVIDX_DOCUMENTSHANDLER_HPP
 
 #include <vector>
 #include <string>
@@ -14,7 +14,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "DocumentInfo.h"
+#include "DocumentInfo.hpp"
 
 namespace fs = std::experimental::filesystem;
 class DocumentsHandler {
@@ -58,4 +58,4 @@ public:
 };
 
 
-#endif //NONPOSINVIDX_DOCUMENTSHANDLER_H
+#endif //NONPOSINVIDX_DOCUMENTSHANDLER_HPP

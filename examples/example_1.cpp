@@ -1,8 +1,8 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "NonPosInvIdx.h"
-#include "DocumentsHandler.h"
+#include "NonPosInvIdx.hpp"
+#include "DocumentsHandler.hpp"
 
 template<class vtype>
 void printVec(std::vector<vtype> &v){

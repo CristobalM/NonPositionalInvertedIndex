@@ -2,8 +2,8 @@
 // Created by Cristobal Miranda, 2019
 //
 
-#ifndef NONPOSINVIDX_DOCUMENTINFO_H
-#define NONPOSINVIDX_DOCUMENTINFO_H
+#ifndef NONPOSINVIDX_DOCUMENTINFO_HPP
+#define NONPOSINVIDX_DOCUMENTINFO_HPP
 
 
 #include <vector>
@@ -34,4 +34,4 @@ public:
 };
 
 
-#endif //NONPOSINVIDX_DOCUMENTINFO_H
+#endif //NONPOSINVIDX_DOCUMENTINFO_HPP
