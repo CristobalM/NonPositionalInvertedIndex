@@ -57,6 +57,9 @@ public:
   const std::vector<std::string> &getDocumentNames() const{
     return documentsNames;
   }
+
+  void save(const std::string &fpath);
+  static DocumentsHandler load(const std::string &fpath);
 };
 
 

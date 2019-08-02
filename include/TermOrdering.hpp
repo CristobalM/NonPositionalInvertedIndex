@@ -31,14 +31,14 @@ struct TFDocOrder {
     for (unsigned long i = 1; i <= uwc; i++) {
       auto &iDocList = wordToDocFreqMap.getWordDocs(i);
       std::vector<int> indexes(iDocList.size());
-      std::vector<int> frequencies(iDocList.size());
+      //std::vector<int> frequencies(iDocList.size());
 
       std::vector<pi> sortedVec(iDocList);
       std::sort(sortedVec.begin(), sortedVec.end(), compareBySecond);
 
       for (unsigned long j = 0; j < sortedVec.size(); j++) {
         indexes[j] = sortedVec[j].first;
-        frequencies[j] = sortedVec[j].second;
+        //frequencies[j] = sortedVec[j].second;
       }
 
       result.push_back(indexes);

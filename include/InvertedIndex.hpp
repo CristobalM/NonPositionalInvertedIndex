@@ -31,9 +31,48 @@ template<class WordToDocFreqMap,
         class Storage = SimpleStorage>
 class InvertedIndex {
 public:
-  explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap) :
-  alphabet_sz((uint) wordToDocFreqMap.getUniqueDocsCount()) {
+  explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap, const std::string &index_name_) :
+  alphabet_sz((uint) wordToDocFreqMap.getUniqueDocsCount()), index_name(index_name_) {
     buildInvertedIndex(wordToDocFreqMap);
+  }
+
+  explicit InvertedIndex(std::unique_ptr<WTHandler> &&wt_handler_,
+          std::unique_ptr<BVHandler> &&terms_separator_,
+          std::vector<int> &word_idx_mapping_,
+          int alphabet_sz_,
+          const std::string &index_name_) :
+          wtHandler(std::move(wt_handler_)),
+          terms_separator(std::move(terms_separator_)),
+          word_idx_mapping(word_idx_mapping_),
+          alphabet_sz(alphabet_sz_),
+          index_name(index_name_){
+
+  }
+
+  void save(const std::string &index_path){
+    wtHandler->save(index_path, index_name, "wtHandler");
+    terms_separator->save(index_path, index_name, "terms_separator");
+    Storage::save_vi(index_path, index_name, "word_idx_mapping", word_idx_mapping);
+    Storage::save_int(index_path, index_name, "alphabet_sz", alphabet_sz);
+  }
+
+  static InvertedIndex load(const std::string &index_path, const std::string &index_name){
+    auto wt_handler_ = WTHandler::load(index_path, index_name, "wtHandler");
+    auto terms_separator_ = BVHandler::load(index_path, index_name, "terms_separator");
+    auto word_idx_mapping_ = Storage::load_vi(index_path, index_name, "word_idx_mapping");
+    auto alphabet_sz_ = Storage::load_int(index_path, index_name, "alphabet_sz");
+    /*
+    auto result = std::make_unique<InvertedIndex>(std::move(wt_handler_),
+            std::move(terms_separator_),
+            word_idx_mapping_,
+            alphabet_sz_,
+            index_name);*/
+
+    return InvertedIndex(std::move(wt_handler_),
+                         std::move(terms_separator_),
+                         word_idx_mapping_,
+                         alphabet_sz_,
+                         index_name);
   }
 
 
@@ -115,6 +154,9 @@ private:
   uint alphabet_sz;
 
   Storage storage;
+
+  std::string index_name;
+
 
   void buildInvertedIndex(WordToDocFreqMap &wordToDocFreqMap) {
     auto orderedByRelevance = RelevanceDocOrder::order(wordToDocFreqMap);
@@ -355,6 +397,8 @@ private:
 
     return output;
   }
+
+
 };
 
 

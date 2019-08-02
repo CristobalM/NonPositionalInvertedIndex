@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   documentsHandler.scanWords();
   documentsHandler.debugPrintScannedWords();
 
-  NonPosInvIdx invertedIndex(documentsHandler);
+  NonPosInvIdx invertedIndex(documentsHandler, "simpleIndex");
 
   std::string &wordToQuery = word1;
   auto docFreqWTQ = invertedIndex.documentFrequency(documentsHandler, wordToQuery);
@@ -66,6 +66,44 @@ int main(int argc, char **argv) {
   for(auto i = 0ul; i < documentNames.size(); i++){
     std::cout << i << ": " << documentNames[i] << std::endl;
   }
+
+  invertedIndex.save(".");
+  documentsHandler.save("documentsHandler");
+
+  auto loadedDocHandler = DocumentsHandler::load("documentsHandler");
+
+  auto loadedIdxP = NonPosInvIdx::load(".", "simpleIndex");
+  auto &loadedIdx = loadedIdxP;
+
+  std::cout << "\n\n\nOn restored index" << std::endl;
+
+  auto docFreqWTQ2 = loadedIdx.documentFrequency(loadedDocHandler, wordToQuery);
+  std::cout << wordToQuery << " Document frequency = " << docFreqWTQ2 << std::endl;
+
+  auto secondSI2 = loadedIdx.ithDocName(loadedDocHandler, wordToQuery, idx_to_query);
+  std::cout << "#" << idx_to_query << " " << wordToQuery << ": " << secondSI << std::endl;
+
+  std::cout << "Pairwise term operations\n";
+
+  auto &firstWord2 = word1;
+  auto &secondWord2 = word2;
+
+  auto and_fpath2 = loadedIdx.termListIntersectionByDocNames(loadedDocHandler, firstWord2, secondWord2);
+  auto and_indexes2 = loadedIdx.termListIntersection(loadedDocHandler, firstWord2, secondWord2);
+
+  std::cout << "AND (file paths): ";
+  printVec(and_fpath2);
+  std::cout << "AND (document indexes): ";
+  printVec(and_indexes2);
+
+  auto or_fpath2 = loadedIdx.termListUnionByDocNames(loadedDocHandler, firstWord2, secondWord2);
+  auto or_indexes2 = loadedIdx.termListUnion(loadedDocHandler, firstWord2, secondWord2);
+
+  std::cout << "OR (file paths): ";
+  printVec(or_fpath2);
+  std::cout << "OR (document indexes): ";
+  printVec(or_indexes2);
+
 
 
   return 0;

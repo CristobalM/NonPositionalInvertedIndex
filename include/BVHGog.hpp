@@ -80,7 +80,7 @@ class BVHGog {
 
   uint bv_size;
 
-  GBV bv;
+  std::unique_ptr<GBV> bv;
 
   bool structures_built;
   uint nofzeros;
@@ -88,25 +88,31 @@ class BVHGog {
 
 public:
   explicit BVHGog(unsigned long bv_size) :
-          bv_size(bv_size), bv(bv_size), structures_built(false), nofzeros(0), nofones(0) {}
+          bv_size(bv_size), bv(std::make_unique<GBV>(bv_size)), structures_built(false), nofzeros(0), nofones(0) {}
+
+  explicit BVHGog(std::unique_ptr<GBV> &&bv_) : bv_size(bv_->size()), bv(std::move(bv_)), structures_built(false), nofzeros(0), nofones(0) {
+    buildStructures();
+  }
+
 
   void bitset(uint i) {
     assert(i >= 1 && i <= bv_size);
-    bv[i - 1] = 1;
+    (*bv)[i - 1] = 1;
   }
 
   void bitclear(uint i) {
     assert(i >= 1 && i <= bv_size);
-    bv[i - 1] = 0;
+    (*bv)[i - 1] = 0;
   }
 
   void buildStructures() {
-    rankSupport = std::make_unique<Rk>(&bv);
-    select0Support = std::make_unique<Sel0>(&bv);
-    select1Support = std::make_unique<Sel1>(&bv);
+    rankSupport = std::make_unique<Rk>(bv.get());
+    select0Support = std::make_unique<Sel0>(bv.get());
+    select1Support = std::make_unique<Sel1>(bv.get());
     structures_built = true;
     nofones = rank(bv_size);
     nofzeros = bv_size - nofones;
+    //std::cout << "Built bv:\n" << bv << std::endl;
   }
 
   inline uint rank(uint i) {
@@ -155,12 +161,28 @@ public:
     return select_1(rank(i));
   }
   inline uint succ(uint i){
-    return select_1(rank(i-1) + 1);
+    auto rk_v = rank(i-1) + 1;
+    auto result =  select_1(rk_v);
+    return result;
   }
 
   void debugDisplay() {
     std::cout << "Debug display of BVHGog: \n"
-              << bv << std::endl;
+              << *bv << std::endl;
+  }
+
+  void save(const std::string &index_path, const std::string &index_name, const std::string &name){
+    auto full_path = index_path + "/" + index_name + "_" + name;
+    std::ofstream out(full_path, std::ios::out | std::ios::binary);
+    bv->serialize(out);
+  }
+
+  static std::unique_ptr<BVHGog> load(const std::string &index_path, const std::string &index_name, const std::string &name){
+    auto full_path = index_path + "/" + index_name + "_" + name;
+    std::ifstream in(full_path, std::ios::in | std::ios::binary);
+    auto stored_wt = std::make_unique<GBV>();
+    stored_wt->load(in);
+    return std::make_unique<BVHGog>(std::move(stored_wt));
   }
 
 };

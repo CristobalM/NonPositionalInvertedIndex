@@ -3,6 +3,9 @@
 //
 
 #include <cassert>
+#include <fstream>
+#include <regex>
+#include <string>
 #include "DocumentsHandler.hpp"
 
 DocumentsHandler::DocumentsHandler(bool clean_on_scan, const std::string &word_regex_str) :
@@ -52,9 +55,13 @@ void DocumentsHandler::debugPrintScannedWords() {
 }
 
 void DocumentsHandler::cleanData() {
+  /*
   for (auto &document :  documents) {
     document->clean();
   }
+   */
+  documents.clear();
+
 }
 
 std::vector<std::pair<int, int>> &DocumentsHandler::getWordDocs(int word_idx) {
@@ -83,4 +90,58 @@ uint DocumentsHandler::getUniqueDocsCount() {
 std::string DocumentsHandler::getDocNameByIdx(int doc_idx) {
   assert(doc_idx >= 0 && (unsigned long)doc_idx < documentsNames.size());
   return documentsNames[doc_idx];
+}
+
+void DocumentsHandler::save(const std::string &fpath) {
+  std::ofstream file_words(fpath + "_words");
+
+  for(auto &word : words_map){
+    file_words << word.first << " " << word.second << "\n";
+  }
+
+  file_words.close();
+
+  std::ofstream file_docs(fpath + "_docs");
+
+  for(auto doc_idx = 0; doc_idx < documentsNames.size(); doc_idx++){
+    file_docs << documentsNames[doc_idx] << "\n";
+  }
+}
+
+DocumentsHandler DocumentsHandler::load(const std::string &fpath) {
+  DocumentsHandler out;
+
+  std::ifstream file_words(fpath + "_words");
+
+  std::string input_line;
+
+  std::regex word_regex_load("([^\\s]+)");
+
+
+
+  while(std::getline(file_words, input_line)){
+    std::vector<std::string> input_matches(std::sregex_token_iterator(input_line.begin(), input_line.end(), word_regex_load),
+                                   std::sregex_token_iterator());
+    assert(input_matches.size() == 2);
+
+    auto word_idx = (int)std::atoi(input_matches[1].c_str());
+    auto word = input_matches[0];
+    out.words_map[word] = word_idx;
+    out.words_map_inv[word_idx] = word;
+  }
+  file_words.close();
+
+  std::ifstream file_docs(fpath + "_docs");
+  while(std::getline(file_docs, input_line)){
+    std::vector<std::string> input_matches(std::sregex_token_iterator(input_line.begin(), input_line.end(), word_regex_load),
+                                           std::sregex_token_iterator());
+    assert(input_matches.size() == 1);
+
+    //auto doc_idx = (int)std::atoi(input_matches[0].c_str());
+    auto doc = input_matches[0];
+    out.documentsNames.push_back(doc);
+  }
+
+
+  return out;
 }

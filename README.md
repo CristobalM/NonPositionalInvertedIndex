@@ -20,11 +20,11 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 * Parametrize the relevance metric
 * Implement **AND**
 * Implement **OR**
+* Add disk storage support.
 
 
 ### To do
 
-* Add disk storage support.
 * Compare to another inverted index.
 * Extend AND and OR for more than two words.
 

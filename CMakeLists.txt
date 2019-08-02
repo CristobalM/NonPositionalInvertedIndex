@@ -4,7 +4,7 @@ project(NonPosInvIdx)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
+#set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
 
 # SDSL install location
 include_directories(~/include)
@@ -43,5 +43,9 @@ add_library(NonPosInvIdx ${INCLUDES_PATHS} ${SOURCES_PATHS})
 target_link_libraries(NonPosInvIdx sdsl stdc++fs)
 
 add_executable(example_1 examples/example_1.cpp)
+add_executable(example_2_load_from_disk examples/example_2_load_from_disk.cpp)
+add_executable(debug_1 examples/debug1.cpp)
 target_link_libraries(example_1 NonPosInvIdx)
+target_link_libraries(example_2_load_from_disk NonPosInvIdx)
+target_link_libraries(debug_1 NonPosInvIdx)
 
