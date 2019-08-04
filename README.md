@@ -21,12 +21,12 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 * Implement **AND**
 * Implement **OR**
 * Add disk storage support.
+* Extend AND and OR for more than two words.
 
 
 ### To do
 
 * Compare to another inverted index.
-* Extend AND and OR for more than two words.
 
 
 ## Build

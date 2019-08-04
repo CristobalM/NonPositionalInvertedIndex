@@ -8,8 +8,6 @@
 #include <fstream>
 #include <vector>
 
-//    Storage::save_int(index_path, index_name, "alphabet_sz", alphabet_sz);
-
 class SimpleStorage{
 public:
   static inline std::string join_path(const std::string &s_a, const std::string &s_b){
@@ -44,20 +42,15 @@ public:
 
   static void save_int(const std::string &index_path, const std::string &index_name, const std::string &int_name, int data){
     auto full_path = join_path(index_path, index_name) + "_" + int_name;
-
-
     std::ofstream out(full_path, std::ios::out | std::ios::binary);
     out.write(reinterpret_cast<char *>(&data), sizeof(int));
-
   }
 
   static int load_int(const std::string &index_path, const std::string &index_name, const std::string &int_name){
     auto full_path = join_path(index_path, index_name) + "_" + int_name;
-
     std::ifstream in(full_path, std::ios::in | std::ios::binary);
     int data;
     in.read(reinterpret_cast<char *>(&data), sizeof(int));
-
     return data;
   }
 

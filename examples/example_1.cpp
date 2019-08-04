@@ -104,6 +104,27 @@ int main(int argc, char **argv) {
   std::cout << "OR (document indexes): ";
   printVec(or_indexes2);
 
+  auto thirdWord = "dictum";
+
+  std::vector<std::string> query_3{firstWord2, secondWord2, thirdWord};
+
+  auto and_fpath3 = loadedIdx.termListIntersectionByDocNames(loadedDocHandler, query_3);
+  auto and_indexes3 = loadedIdx.termListIntersection(loadedDocHandler, query_3);
+
+  std::cout << "(More than 2)\nAND (file paths): ";
+  printVec(and_fpath3);
+  std::cout << "AND (document indexes): ";
+  printVec(and_indexes3);
+
+
+  auto or_fpath3 = loadedIdx.termListUnionByDocNames(loadedDocHandler, query_3);
+  auto or_indexes3 = loadedIdx.termListUnion(loadedDocHandler, query_3);
+
+  std::cout << "OR (file paths): ";
+  printVec(or_fpath3);
+  std::cout << "OR (document indexes): ";
+  printVec(or_indexes3);
+
 
 
   return 0;
