@@ -34,6 +34,9 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 * First make sure SDSL is installed in ~/include and ~/lib as specified by its repository.
 * Alternatively, SDSL install location can be changed from CMakeLists.txt
 
+* <experimental/filesystem> is a dependency of this project, make sure you have
+C++17 and your compiler up to date. This is known to work under g++ 7.4.0.
+
 From the root directory of this project run:
 
 ```
