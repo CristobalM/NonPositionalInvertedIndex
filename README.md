@@ -51,3 +51,9 @@ make
 cd build
 ./example_1 ../examples/lorem_ipsum dolor Lorem
 ```
+
+## Build inverted index
+
+```
+./build_inverted_index --index_name=INDEX_NAME --read_from_dir=PATH_TO_DOCUMENTS_DIR --save_location=PATH_TO_SAVE_LOCATION
+```
