@@ -20,7 +20,8 @@ int main() {
   std::string wordToQuery = "dolor";
   int idx_to_query = 1;
 
-  auto loadedDocHandler = DocumentsHandler::load("documentsHandler");
+  auto loadedDocHandlerP = DocumentsHandler::load("documentsHandler");
+  auto &loadedDocHandler = *loadedDocHandlerP;
 
   auto loadedIdxP = NonPosInvIdx::load(".", "simpleIndex");
   auto &loadedIdx = loadedIdxP;

@@ -70,7 +70,8 @@ int main(int argc, char **argv) {
   invertedIndex.save(".");
   documentsHandler.save("documentsHandler");
 
-  auto loadedDocHandler = DocumentsHandler::load("documentsHandler");
+  auto loadedDocHandlerP = DocumentsHandler::load("documentsHandler");
+  auto &loadedDocHandler = *loadedDocHandlerP;
 
   auto loadedIdxP = NonPosInvIdx::load(".", "simpleIndex");
   auto &loadedIdx = loadedIdxP;
