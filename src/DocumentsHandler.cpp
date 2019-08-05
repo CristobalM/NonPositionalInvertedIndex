@@ -6,6 +6,14 @@
 #include <fstream>
 #include <regex>
 #include <string>
+
+
+#include <algorithm>
+
+#include <functional>
+
+#include "SafeQueue.hpp"
+
 #include "DocumentsHandler.hpp"
 
 DocumentsHandler::DocumentsHandler(bool clean_on_scan, const std::string &word_regex_str) :
@@ -20,25 +28,78 @@ void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_p
   }
 }
 
-void DocumentsHandler::scanWords() {
-  for (unsigned long i = 0; i < documents.size(); i++) {
-    auto &document = *documents[i];
-    document.readDocument(word_regex);
-    for (auto &word_freqs_pair : document.getWordsFreqPairs()) {
-      auto &word = word_freqs_pair.first;
-      auto freq = word_freqs_pair.second;
-      if (!wordExists(word)) {
-        words_map[word] = ++last_assigned_int;
-        words_map_inv[last_assigned_int] = word;
-      }
 
-      auto word_idx = words_map[word];
-      words_to_docs_map[word_idx].emplace_back(i, freq);
+const unsigned long MAX_THREADS = 1000;
+
+
+void DocumentsHandler::processDocument(DocumentInfo *document_ptr, int document_index) {
+  auto &document = *document_ptr;
+  document.readDocument(word_regex);
+  auto lg = std::lock_guard(wtd_mutex);
+  for (auto &word_freqs_pair : document.getWordsFreqPairs()) {
+    auto &word = word_freqs_pair.first;
+    auto freq = word_freqs_pair.second;
+
+    if (!wordExists(word)) {
+      words_map[word] = ++last_assigned_int;
+      words_map_inv[last_assigned_int] = word;
     }
-    if (clean_on_scan) {
-      document.clean();
-    }
+    auto word_idx = words_map[word];
+    words_to_docs_map[word_idx].emplace_back(document_index, freq);
   }
+  if (clean_on_scan) {
+    document.clean();
+  }
+}
+
+
+using JobsQueue = SafeQueue<std::unique_ptr<std::function<void()>>>;
+
+std::mutex consumer_mt;
+
+void consumerJob(JobsQueue *jobs_queue_ptr){
+  auto &jobs_queue = *jobs_queue_ptr;
+  while(!jobs_queue.empty()){
+    auto ul = std::unique_lock(consumer_mt);
+    auto current_job = std::move(jobs_queue.front());
+    jobs_queue.pop_front();
+    ul.unlock();
+    auto &current_job_fun = *current_job;
+    current_job_fun();
+  }
+}
+
+void DocumentsHandler::scanWords() {
+  auto thread_count = std::min<unsigned long>(documents.size(), MAX_THREADS);
+  std::vector<std::thread> docs_threads;
+  JobsQueue processing_queue;
+
+  for (unsigned long i = 0; i < documents.size(); i++) {
+    auto document_ptr = documents[i].get();
+
+    processing_queue.emplace_back(std::make_unique<std::function<void()>>(
+            std::bind(&DocumentsHandler::processDocument, this, document_ptr, (int)i)));
+
+  }
+
+  std::cout << "Starting " << thread_count << " threads to read the files\n";
+
+  for(auto i = 0; i < thread_count; i++){
+    //docs_threads.emplace_back(consumerJob, &processing_queue);
+    docs_threads.emplace_back(consumerJob, &processing_queue);
+  }
+
+
+  for(auto &doc_thread: docs_threads){
+    doc_thread.join();
+  }
+
+  std::cout << "Finished reading files\nCleaning unnecessary data" << std::endl;
+
+  if(clean_on_scan){
+    cleanData();
+  }
+  std::cout << "Finished cleaning unnecessary data" << std::endl;
 }
 
 void DocumentsHandler::debugPrintScannedWords() {
@@ -55,13 +116,7 @@ void DocumentsHandler::debugPrintScannedWords() {
 }
 
 void DocumentsHandler::cleanData() {
-  /*
-  for (auto &document :  documents) {
-    document->clean();
-  }
-   */
   documents.clear();
-
 }
 
 std::vector<std::pair<int, int>> &DocumentsHandler::getWordDocs(int word_idx) {
@@ -108,8 +163,9 @@ void DocumentsHandler::save(const std::string &fpath) {
   }
 }
 
-DocumentsHandler DocumentsHandler::load(const std::string &fpath) {
-  DocumentsHandler out;
+std::unique_ptr<DocumentsHandler> DocumentsHandler::load(const std::string &fpath) {
+  auto out_uptr = std::make_unique<DocumentsHandler>();
+  auto &out = *out_uptr;
 
   std::ifstream file_words(fpath + "_words");
 
@@ -143,5 +199,5 @@ DocumentsHandler DocumentsHandler::load(const std::string &fpath) {
   }
 
 
-  return out;
+  return out_uptr;
 }

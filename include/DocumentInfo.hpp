@@ -32,6 +32,7 @@ public:
   int getUniqueWC();
 
   void clean();
+  std::string &getFilename();
 };
 
 

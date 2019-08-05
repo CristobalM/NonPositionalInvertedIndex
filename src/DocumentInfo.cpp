@@ -52,3 +52,7 @@ int DocumentInfo::getUniqueWC() {
   return  words_freq_pairs.size();
 }
 
+std::string &DocumentInfo::getFilename() {
+  return filename;
+}
+

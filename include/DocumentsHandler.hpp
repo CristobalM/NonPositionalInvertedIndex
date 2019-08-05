@@ -14,6 +14,9 @@
 #include <iostream>
 #include <sstream>
 
+#include <thread>
+#include <mutex>
+
 #include "DocumentInfo.hpp"
 
 namespace fs = std::experimental::filesystem;
@@ -31,8 +34,11 @@ class DocumentsHandler {
   int last_assigned_int;
   std::regex word_regex;
 
+  std::mutex wtd_mutex;
 
   bool wordExists(const std::string &word);
+
+  void processDocument(DocumentInfo *document, int document_index);
 
 public:
   explicit DocumentsHandler(bool clean_on_scan = true, const std::string &word_regex_str = "([^\\s]+)");
@@ -59,7 +65,9 @@ public:
   }
 
   void save(const std::string &fpath);
-  static DocumentsHandler load(const std::string &fpath);
+  static std::unique_ptr<DocumentsHandler> load(const std::string &fpath);
+
+
 };
 
 
