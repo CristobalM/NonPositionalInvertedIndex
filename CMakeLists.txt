@@ -3,7 +3,7 @@ project(NonPosInvIdx)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+set(CMAKE_BUILD_TYPE Debug)
 #set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
 
 # SDSL install location

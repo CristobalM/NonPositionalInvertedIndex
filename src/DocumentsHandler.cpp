@@ -23,13 +23,12 @@ void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_p
   auto dir_iterator = fs::directory_iterator(directory_path);
   for (auto &doc_fname : dir_iterator) {
     documents.push_back(std::make_unique<DocumentInfo>(doc_fname.path()));
-    std::cout << "Creating DocumentInfo with path: " << doc_fname.path() << std::endl;
     documentsNames.push_back(doc_fname.path());
   }
 }
 
 
-const unsigned long MAX_THREADS = 1000;
+const unsigned long MAX_THREADS = 10;
 
 
 void DocumentsHandler::processDocument(DocumentInfo *document_ptr, int document_index) {
@@ -42,7 +41,6 @@ void DocumentsHandler::processDocument(DocumentInfo *document_ptr, int document_
 
     if (!wordExists(word)) {
       words_map[word] = ++last_assigned_int;
-      words_map_inv[last_assigned_int] = word;
     }
     auto word_idx = words_map[word];
     words_to_docs_map[word_idx].emplace_back(document_index, freq);
@@ -53,7 +51,7 @@ void DocumentsHandler::processDocument(DocumentInfo *document_ptr, int document_
 }
 
 
-using JobsQueue = SafeQueue<std::unique_ptr<std::function<void()>>>;
+using JobsQueue = SafeQueue<std::function<void()>>;
 
 std::mutex consumer_mt;
 
@@ -64,8 +62,7 @@ void consumerJob(JobsQueue *jobs_queue_ptr){
     auto current_job = std::move(jobs_queue.front());
     jobs_queue.pop_front();
     ul.unlock();
-    auto &current_job_fun = *current_job;
-    current_job_fun();
+    current_job();
   }
 }
 
@@ -77,18 +74,14 @@ void DocumentsHandler::scanWords() {
   for (unsigned long i = 0; i < documents.size(); i++) {
     auto document_ptr = documents[i].get();
 
-    processing_queue.emplace_back(std::make_unique<std::function<void()>>(
-            std::bind(&DocumentsHandler::processDocument, this, document_ptr, (int)i)));
-
+    processing_queue.emplace_back(std::bind(&DocumentsHandler::processDocument, this, document_ptr, (int)i));
   }
 
   std::cout << "Starting " << thread_count << " threads to read the files\n";
 
-  for(auto i = 0; i < thread_count; i++){
-    //docs_threads.emplace_back(consumerJob, &processing_queue);
+  for(auto i = 0ul; i < thread_count; i++){
     docs_threads.emplace_back(consumerJob, &processing_queue);
   }
-
 
   for(auto &doc_thread: docs_threads){
     doc_thread.join();
@@ -102,18 +95,6 @@ void DocumentsHandler::scanWords() {
   std::cout << "Finished cleaning unnecessary data" << std::endl;
 }
 
-void DocumentsHandler::debugPrintScannedWords() {
-  std::cout << "DEBUG: Printing words_to_doc_map" << std::endl;
-  std::stringstream ss;
-  for (auto &map_element : words_to_docs_map) {
-    std::stringstream subss;
-    for (auto &doc_info : map_element.second) {
-      subss << "(" << doc_info.first << ", " << doc_info.second << ") | ";
-    }
-    ss << "Word #" << map_element.first << " (" << words_map_inv[map_element.first] << "):\t" << subss.str() << "\n";
-  }
-  std::cout << ss.str() << std::endl;
-}
 
 void DocumentsHandler::cleanData() {
   documents.clear();
@@ -158,7 +139,7 @@ void DocumentsHandler::save(const std::string &fpath) {
 
   std::ofstream file_docs(fpath + "_docs");
 
-  for(auto doc_idx = 0; doc_idx < documentsNames.size(); doc_idx++){
+  for(auto doc_idx = 0ul; doc_idx < documentsNames.size(); doc_idx++){
     file_docs << documentsNames[doc_idx] << "\n";
   }
 }
@@ -183,7 +164,6 @@ std::unique_ptr<DocumentsHandler> DocumentsHandler::load(const std::string &fpat
     auto word_idx = (int)std::atoi(input_matches[1].c_str());
     auto word = input_matches[0];
     out.words_map[word] = word_idx;
-    out.words_map_inv[word_idx] = word;
   }
   file_words.close();
 
@@ -193,11 +173,14 @@ std::unique_ptr<DocumentsHandler> DocumentsHandler::load(const std::string &fpat
                                            std::sregex_token_iterator());
     assert(input_matches.size() == 1);
 
-    //auto doc_idx = (int)std::atoi(input_matches[0].c_str());
     auto doc = input_matches[0];
     out.documentsNames.push_back(doc);
   }
 
 
   return out_uptr;
+}
+
+void DocumentsHandler::clearWordsToDocMap() {
+  words_to_docs_map.clear();
 }

@@ -25,7 +25,7 @@ namespace fs = std::experimental::filesystem;
 class DocumentsHandler {
   std::vector<std::unique_ptr<DocumentInfo>> documents;
   std::unordered_map<std::string, int> words_map;
-  std::unordered_map<int, std::string> words_map_inv;
+
   std::unordered_map<int, std::vector<std::pair<int, int>>> words_to_docs_map; // word_idx -> [(doc_idx, freq_in_doc)...]
 
   std::vector<std::string> documentsNames;
@@ -47,7 +47,7 @@ public:
 
   void scanWords();
 
-  void debugPrintScannedWords();
+  //void debugPrintScannedWords();
 
   void cleanData();
 
@@ -66,6 +66,8 @@ public:
 
   void save(const std::string &fpath);
   static std::unique_ptr<DocumentsHandler> load(const std::string &fpath);
+
+  void clearWordsToDocMap();
 
 
 };

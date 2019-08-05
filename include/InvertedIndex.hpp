@@ -198,6 +198,7 @@ private:
 
   void buildInvertedIndex(WordToDocFreqMap &wordToDocFreqMap) {
     auto orderedByRelevance = RelevanceDocOrder::order(wordToDocFreqMap);
+    wordToDocFreqMap.clearWordsToDocMap(); // memory optimisation
     auto grouping = TermGrouping::group(orderedByRelevance);
     auto &raw_result_sequence = grouping.raw_result_sequence;
     word_idx_mapping = std::move(grouping.word_idx_mapping);
@@ -264,7 +265,7 @@ private:
 
   struct AndOperation {
     static inline bool failCondition(TraversalNode &currentTNode) {
-      for(auto i = 0; i < currentTNode.left_indexes->size(); i++){
+      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
         if(currentTNode.left_indexes->at(i) > currentTNode.right_indexes->at(i)){
           return true;
         }
@@ -274,7 +275,7 @@ private:
 
     static inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
                                         std::vector<uint> &left_indexes, std::vector<uint> &right_indexes) {
-      for(auto i = 0; i < currentTNode.left_indexes->size(); i++){
+      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
         auto current_li = currentTNode.left_indexes->at(i);
         auto current_ri = currentTNode.right_indexes->at(i);
         left_indexes.push_back(wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1);
@@ -294,14 +295,14 @@ private:
     inline bool failCondition(TraversalNode &currentTNode) {
       if(failed.size() == 0){
         failed.resize(currentTNode.left_indexes->size());
-        for(auto i = 0; i < failed.size(); i++){
+        for(auto i = 0ul; i < failed.size(); i++){
           failed[i] = false;
         }
       }
 
       bool failing = true;
 
-      for(auto i = 0; i < currentTNode.left_indexes->size(); i++){
+      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
         auto current_li = currentTNode.left_indexes->at(i);
         auto current_ri = currentTNode.right_indexes->at(i);
         failed[i] = current_li > current_ri;
@@ -314,7 +315,7 @@ private:
     inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
                                  std::vector<uint> &left_indexes, std::vector<uint> &right_indexes) {
 
-      for(auto i = 0; i < currentTNode.left_indexes->size(); i++){
+      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
         auto current_li = currentTNode.left_indexes->at(i);
         auto current_ri = currentTNode.right_indexes->at(i);
         uint left_val, right_val;
@@ -436,7 +437,7 @@ private:
       auto &left_indexes_lc_ = *traversal_node_left.left_indexes;
       auto &right_indexes_lc_ = *traversal_node_left.right_indexes;
 
-      for(auto i = 0; i < left_indexes_lc_.size(); i++){
+      for(auto i = 0ul; i < left_indexes_lc_.size(); i++){
         auto left_index_lc_current = currentTNode.left_indexes->at(i);
         auto right_index_lc_current = currentTNode.right_indexes->at(i);
         auto left_index_lc = left_indexes_lc_[i];

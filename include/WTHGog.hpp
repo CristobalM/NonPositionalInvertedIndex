@@ -45,13 +45,6 @@ class WTHGog {
 public:
   using WTNode = WTType::node_type;
 
-  /*
-  explicit WTHGog(std::istream &in) {
-    sdsl::int_vector<> iv;
-    iv.load(in);
-    sdsl::construct_im(*wt, iv);
-  }
-   */
 
   explicit WTHGog(std::unique_ptr<WTType> &&in) : wt(std::move(in)){
   }
