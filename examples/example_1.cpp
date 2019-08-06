@@ -27,7 +27,6 @@ int main(int argc, char **argv) {
 
   documentsHandler.initDocumentsFromDirectory(dir_path);
   documentsHandler.scanWords();
-  documentsHandler.debugPrintScannedWords();
 
   NonPosInvIdx invertedIndex(documentsHandler, "simpleIndex");
 
