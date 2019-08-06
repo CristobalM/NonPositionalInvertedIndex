@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
 
   std::regex word_regex("([^\\s]+)");
 
-  std::vector<std::unique_ptr<std::vector<std::string>>> queries;
+  std::vector<std::unique_ptr<v_str>> queries;
   std::vector<std::unique_ptr<QueryOperation>> queries_ops;
 
   if (query_input_type == "file") {
@@ -161,7 +161,7 @@ int main(int argc, char **argv) {
       std::smatch sm;
       bool first = true;
 
-      auto query_terms = std::make_unique<std::vector<std::string>>();
+      auto query_terms = std::make_unique<v_str>();
 
       std::string query_op_s;
       for (auto r_it = std::sregex_iterator(line.begin(), line.end(), word_regex);
@@ -213,7 +213,7 @@ int main(int argc, char **argv) {
 
   auto loadedIdx = NonPosInvIdx::load(index_base_path, index_filename);
 
-  std::vector<std::string> result;
+  v_str result;
 
   auto start_time = std::chrono::steady_clock::now();
   for(const auto &qop : queries_ops){
