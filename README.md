@@ -68,3 +68,29 @@ cd build
 * For index_path, concatenate PATH_TO_SAVE_LOCATION/INDEX_NAME from build_inverted_index
 * --query_type must be one of "AND" or "OR"
 * --query_input must be quoted if there are more than one word, for example: --query_input="one two three"
+
+
+## Run multiple queries
+
+```
+--index_path="INDEX_PATH/INDEX_NAME" --queries_file_path=PATH_TO_QUERIES_FILE
+```
+
+The queries file has the following syntax:
+
+Each line corresponds to a query, where the first word specifies which
+query to run.
+
+Possible queries:
+
+* AND term1 term2 term3 ...
+* OR term1 term2 term3 ...
+* DOCUMENT_FREQUENCY term
+* ITH_DOCUMENT term index_i
+
+Where each query means:
+
+* AND finds the documents where all of term1 term2 term3 ... appear in
+* OR finds the documents where any of term1 term2 term3 ... appear in
+* DOCUMENT_FREQUENCY stands for the number of documents where term appears
+* ITH_DOCUMENT gives the ith document of the word specified by term, ordered by the word frequency in each document.

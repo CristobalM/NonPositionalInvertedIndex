@@ -73,28 +73,39 @@ int main(int argc, char **argv){
 
   std::vector<std::string> query_terms;
 
+  std::regex word_regex("([^\\s]+)");
+
   if(query_input_type == "command_line"){
-    std::regex word_regex("([^\\s]+)");
     std::smatch sm;
     for (auto r_it = std::sregex_iterator(query_input.begin(), query_input.end(), word_regex);
-    r_it != std::sregex_iterator();r_it++) {
+         r_it != std::sregex_iterator();r_it++) {
       auto match = *r_it;
       auto word = match.str(0);
       query_terms.push_back(word);
     }
   }
   else if(query_input_type == "file"){
-    throw std::runtime_error("Query input type " + query_input_type + " is not currently supported");
+    //throw std::runtime_error("Query input type " + query_input_type + " is not currently supported");
+    std::ifstream input_file(query_input);
+
+    std::string line;
+
+    while(std::getline(input_file, line)){
+      std::smatch sm;
+      for (auto r_it = std::sregex_iterator(query_input.begin(), query_input.end(), word_regex);
+           r_it != std::sregex_iterator();r_it++) {
+        auto match = *r_it;
+        auto word = match.str(0);
+        query_terms.push_back(word);
+      }
+    }
+
+    input_file.close();
+
   }
   else{
     throw std::runtime_error("Query input type " + query_input_type + " invalid");
   }
-
-  std::cout << "query_input: \n";
-  for(const auto &q : query_terms){
-    std::cout << q << std::endl;
-  }
-
 
   fs::path path_index(index_path);
   auto index_base_path = path_index.parent_path();
