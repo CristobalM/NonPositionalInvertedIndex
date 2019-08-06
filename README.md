@@ -73,7 +73,7 @@ cd build
 ## Run multiple queries
 
 ```
---index_path="INDEX_PATH/INDEX_NAME" --queries_file_path=PATH_TO_QUERIES_FILE
+./multiple_query_index --index_path="INDEX_PATH/INDEX_NAME" --queries_file_path=PATH_TO_QUERIES_FILE
 ```
 
 The queries file has the following syntax:
