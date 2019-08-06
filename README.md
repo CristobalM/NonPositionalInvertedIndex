@@ -67,3 +67,4 @@ cd build
 
 * For index_path, concatenate PATH_TO_SAVE_LOCATION/INDEX_NAME from build_inverted_index
 * --query_type must be one of "AND" or "OR"
+* --query_input must be quoted if there are more than one word, for example: --query_input="one two three"
