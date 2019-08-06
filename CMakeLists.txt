@@ -12,9 +12,8 @@ link_directories(~/lib)
 
 include_directories(${CMAKE_SOURCE_DIR}/lib)
 
-
-
 include_directories(include)
+
 set(INCLUDES_FILES
         TermOrdering.hpp
         TermGrouping.hpp
