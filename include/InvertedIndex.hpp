@@ -184,9 +184,7 @@ private:
   std::vector<int> word_idx_mapping;
 
   uint alphabet_sz;
-
-  Storage storage;
-
+  
   std::string index_name;
 
   std::vector<uint> getIndexesFromTerms(WordToDocFreqMap &wordToDocFreqMap, std::vector<std::string> &terms_list){
