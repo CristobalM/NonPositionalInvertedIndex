@@ -31,6 +31,8 @@ template<class WordToDocFreqMap,
         class Storage = SimpleStorage>
 class InvertedIndex {
 public:
+  InvertedIndex(const InvertedIndex&) = delete;
+  
   explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap, const std::string &index_name_) :
   alphabet_sz((uint) wordToDocFreqMap.getUniqueDocsCount()), index_name(index_name_) {
     buildInvertedIndex(wordToDocFreqMap);

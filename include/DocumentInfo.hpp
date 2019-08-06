@@ -23,6 +23,7 @@ class DocumentInfo {
   static inline bool hasKey(std::unordered_map<std::string, int> &map_, const std::string &key);
 
 public:
+  DocumentInfo(const DocumentInfo&) = delete;
   explicit DocumentInfo(const std::string &filename);
 
   void readDocument(const std::regex &word_regex);

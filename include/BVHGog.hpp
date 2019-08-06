@@ -87,6 +87,8 @@ class BVHGog {
   uint nofones;
 
 public:
+  BVHGog(const BVHGog&) = delete;
+
   explicit BVHGog(unsigned long bv_size) :
           bv_size(bv_size), bv(std::make_unique<GBV>(bv_size)), structures_built(false), nofzeros(0), nofones(0) {}
 

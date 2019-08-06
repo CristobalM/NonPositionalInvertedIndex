@@ -43,6 +43,8 @@ class DocumentsHandler {
   void processDocument(DocumentInfo *document, int document_index);
 
 public:
+  DocumentsHandler(const DocumentsHandler&) = delete;
+  
   explicit DocumentsHandler(bool clean_on_scan = true, const std::string &word_regex_str = "([^\\s]+)");
 
   void initDocumentsFromDirectory(const std::string &directory_path);

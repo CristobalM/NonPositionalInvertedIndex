@@ -14,6 +14,9 @@ private:
   std::deque<T> q;
   std::mutex m;
 public:
+  explicit SafeQueue() = default;
+  SafeQueue(const SafeQueue&) = delete;
+
   void push_back(T &t){
     auto lg = std::lock_guard(m);
     q.push_back(t);

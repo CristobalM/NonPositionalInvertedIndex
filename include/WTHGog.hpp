@@ -45,6 +45,7 @@ class WTHGog {
 public:
   using WTNode = WTType::node_type;
 
+  WTHGog(const WTHGog&) = delete;
 
   explicit WTHGog(std::unique_ptr<WTType> &&in) : wt(std::move(in)){
   }
