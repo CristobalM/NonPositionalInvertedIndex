@@ -36,6 +36,8 @@ class DocumentsHandler {
 
   std::mutex wtd_mutex;
 
+  uint unique_docs_count;
+
   bool wordExists(const std::string &word);
 
   void processDocument(DocumentInfo *document, int document_index);

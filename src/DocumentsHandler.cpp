@@ -17,7 +17,7 @@
 #include "DocumentsHandler.hpp"
 
 DocumentsHandler::DocumentsHandler(bool clean_on_scan, const std::string &word_regex_str) :
-clean_on_scan(clean_on_scan), last_assigned_int(0), word_regex(word_regex_str) {}
+clean_on_scan(clean_on_scan), last_assigned_int(0), word_regex(word_regex_str), unique_docs_count(0) {}
 
 void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_path) {
   auto dir_iterator = fs::directory_iterator(directory_path);
@@ -25,6 +25,7 @@ void DocumentsHandler::initDocumentsFromDirectory(const std::string &directory_p
     documents.push_back(std::make_unique<DocumentInfo>(doc_fname.path()));
     documentsNames.push_back(doc_fname.path());
   }
+  unique_docs_count = documents.size();
 }
 
 
@@ -120,7 +121,7 @@ int DocumentsHandler::getWordIdxByName(const std::string &word_name) {
 }
 
 uint DocumentsHandler::getUniqueDocsCount() {
-  return documents.size();
+  return unique_docs_count;
 }
 
 std::string DocumentsHandler::getDocNameByIdx(int doc_idx) {
@@ -169,12 +170,14 @@ std::unique_ptr<DocumentsHandler> DocumentsHandler::load(const std::string &fpat
 
   std::ifstream file_docs(fpath + "_docs");
   while(std::getline(file_docs, input_line)){
+    /*
     std::vector<std::string> input_matches(std::sregex_token_iterator(input_line.begin(), input_line.end(), word_regex_load),
                                            std::sregex_token_iterator());
     assert(input_matches.size() == 1);
 
     auto doc = input_matches[0];
-    out.documentsNames.push_back(doc);
+     */
+    out.documentsNames.push_back(input_line);
   }
 
 

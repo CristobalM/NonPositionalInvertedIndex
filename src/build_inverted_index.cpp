@@ -3,6 +3,9 @@
 //
 
 #include <memory>
+#include <experimental/filesystem>
+
+#include <fstream>
 
 #include "cxxopts/cxxopts.hpp"
 
@@ -63,5 +66,11 @@ int main(int argc, char **argv){
   documentsHandler.scanWords();
   NonPosInvIdx invertedIndex(documentsHandler, index_name);
   invertedIndex.save(save_location);
-  documentsHandler.save(save_location + index_name + "_documentsHandler");
+  auto index_meta_save_path =(fs::path(save_location) / fs::path(index_name)).string();
+  auto docs_handler_basepname =  index_meta_save_path + "_documentsHandler";
+  documentsHandler.save(docs_handler_basepname);
+
+  std::ofstream metafile(index_meta_save_path);
+  metafile << index_meta_save_path;
+
 }
