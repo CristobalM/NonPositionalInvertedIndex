@@ -65,4 +65,5 @@ cd build
 ./single_query_index --index_path="INDEX_PATH/INDEX_NAME" --query_type="AND|OR" --query_input=LIST_OF_WORDS_SEPARATED_BY_SPACE
 ```
 
-for index_path, concatenate PATH_TO_SAVE_LOCATION/INDEX_NAME from build_inverted_index
+* For index_path, concatenate PATH_TO_SAVE_LOCATION/INDEX_NAME from build_inverted_index
+* --query_type must be one of "AND" or "OR"
