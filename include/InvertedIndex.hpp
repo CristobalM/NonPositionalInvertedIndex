@@ -273,13 +273,19 @@ private:
       return false;
     }
 
-    static inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
-                                        std::vector<uint> &left_indexes, std::vector<uint> &right_indexes) {
+    static inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode, std::vector<uint> &left_indexes_lc,
+                                        std::vector<uint> &right_indexes_lc, std::vector<uint> &left_indexes_rc,
+                                        std::vector<uint> &right_indexes_rc) {
       for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
         auto current_li = currentTNode.left_indexes->at(i);
         auto current_ri = currentTNode.right_indexes->at(i);
-        left_indexes.push_back(wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1);
-        right_indexes.push_back(wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri));
+        
+        auto left_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
+        auto right_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
+        left_indexes_lc.push_back(left_val_lc);
+        right_indexes_lc.push_back(right_val_lc);
+        left_indexes_rc.push_back(current_li - left_val_lc + 1);
+        right_indexes_rc.push_back(current_ri - right_val_lc);
       }
     }
 
@@ -312,23 +318,21 @@ private:
       return failing;
     }
 
-    inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode,
-                                 std::vector<uint> &left_indexes, std::vector<uint> &right_indexes) {
+    inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode, std::vector<uint> &left_indexes_lc,
+                                 std::vector<uint> &right_indexes_lc, std::vector<uint> &left_indexes_rc,
+                                 std::vector<uint> &right_indexes_rc) {
 
       for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
         auto current_li = currentTNode.left_indexes->at(i);
         auto current_ri = currentTNode.right_indexes->at(i);
-        uint left_val, right_val;
-        if(failed[i]){
-          left_val = currentTNode.wt_node.size + 1;
-          right_val = 0;
+        if(!failed[i]){
+          auto left_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
+          auto right_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
+          left_indexes_lc.push_back(left_val);
+          right_indexes_lc.push_back(right_val);
+          left_indexes_rc.push_back(current_li - left_val + 1);
+          right_indexes_rc.push_back(current_ri - right_val);
         }
-        else{
-          left_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
-          right_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
-        }
-        left_indexes.push_back(left_val);
-        right_indexes.push_back(right_val);
       }
     }
 
@@ -421,7 +425,8 @@ private:
       auto left_indexes_rc = std::make_unique<std::vector<uint>>();
       auto right_indexes_rc = std::make_unique<std::vector<uint>>();
 
-      traversalOperation.setTermVariables(*wtHandler, currentTNode, *left_indexes_lc, *right_indexes_lc);
+      traversalOperation.setTermVariables(*wtHandler, currentTNode, *left_indexes_lc, *right_indexes_lc,
+              *left_indexes_rc, *right_indexes_rc);
 
       auto[left_child, right_child] = wtHandler->getChildren(currentTNode.wt_node);
 
@@ -434,17 +439,6 @@ private:
               left_child
       };
 
-      auto &left_indexes_lc_ = *traversal_node_left.left_indexes;
-      auto &right_indexes_lc_ = *traversal_node_left.right_indexes;
-
-      for(auto i = 0ul; i < left_indexes_lc_.size(); i++){
-        auto left_index_lc_current = currentTNode.left_indexes->at(i);
-        auto right_index_lc_current = currentTNode.right_indexes->at(i);
-        auto left_index_lc = left_indexes_lc_[i];
-        auto right_index_lc = right_indexes_lc_[i];
-        left_indexes_rc->push_back(left_index_lc_current - left_index_lc + 1);
-        right_indexes_rc->push_back(right_index_lc_current - right_index_lc);
-      }
 
       TraversalNode traversal_node_right = {
               m + 1, currentTNode.right_symbol,

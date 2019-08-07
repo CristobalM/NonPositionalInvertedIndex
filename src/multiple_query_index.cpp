@@ -106,6 +106,7 @@ int main(int argc, char **argv) {
   static const std::string INDEX_PATH = "index_path";
   static const std::string QUERY_INPUT_TYPE = "query_input_type";
   static const std::string FILE_PATH = "queries_file_path";
+  static const std::string SILENCE_RESULTS = "silence_results";
 
   std::vector<SummaryOptions> opts = {
           {INDEX_PATH,       "Path where the index is stored", cxxopts::value<std::string>()},
@@ -118,6 +119,8 @@ int main(int argc, char **argv) {
   for (auto &opt : opts) {
     acc_opts(opt.option, opt.description, opt.value);
   }
+
+  acc_opts(SILENCE_RESULTS, "If this is active, the results will not be shown");
 
   std::unique_ptr<cxxopts::ParseResult> result_opt_ptr;
 
@@ -146,6 +149,8 @@ int main(int argc, char **argv) {
 
   auto query_input = result_opt[FILE_PATH].as<std::string>();
 
+
+  auto silence_results = result_opt[SILENCE_RESULTS].as<bool>();
 
   std::regex word_regex("([^\\s]+)");
 
@@ -218,18 +223,22 @@ int main(int argc, char **argv) {
   auto start_time = std::chrono::steady_clock::now();
   for(const auto &qop : queries_ops){
     qop->runOperation(loadedDocHandler, loadedIdx);
-    result.push_back(qop->getResult());
+    if(!silence_results){
+      result.push_back(qop->getResult());
+    }
   }
   auto end_time = std::chrono::steady_clock::now();
   auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
 
   std::cout << "Finished running queries. Elapsed time: " << elapsed_time << "ms" << std::endl;
 
-  auto counter = 0;
-  for(const auto &r : result){
-    std::cout << "#" << ++counter << " Result:\n" << r << "\n" << std::endl;
-  }
+  if(!silence_results){
+    auto counter = 0;
+    for(const auto &r : result){
+      std::cout << "#" << ++counter << " Result:\n" << r << "\n" << std::endl;
+    }
 
+  }
 
   return 0;
 }
