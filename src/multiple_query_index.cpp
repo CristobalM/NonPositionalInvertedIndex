@@ -18,11 +18,13 @@ using v_str = std::vector<std::string>;
 class QueryOperation{
 protected:
   v_str *query_terms;
+  bool with_indexes;
 public:
-  explicit QueryOperation(v_str *query_terms) : query_terms(query_terms){}
+  explicit QueryOperation(v_str *query_terms, bool with_indexes) : query_terms(query_terms), with_indexes(with_indexes){}
   virtual void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) = 0;
   virtual std::string getResult() = 0;
-  static std::string joinListResult(v_str &list_result){
+  template <class T>
+  static std::string joinListResult(T &list_result){
     std::stringstream ss;
     for(const auto &r : list_result){
       ss << r << "\n";
@@ -34,30 +36,43 @@ public:
 class AndQueryOperation : public QueryOperation{
   using QueryOperation::query_terms;
   v_str result;
+  std::vector<int> result_idxs;
 public:
-  explicit AndQueryOperation(v_str *query_terms) : QueryOperation(query_terms){}
+  explicit AndQueryOperation(v_str *query_terms, bool with_indexes) : QueryOperation(query_terms, with_indexes){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
-    result = i_idx.termListIntersectionByDocNames(d_handler, *query_terms);
+    if(with_indexes){
+      result_idxs = i_idx.termListIntersection(d_handler, *query_terms);
+    }
+    else{
+      result = i_idx.termListIntersectionByDocNames(d_handler, *query_terms);
+    }
   }
 
   std::string getResult() override {
-    return joinListResult(result);
+    return with_indexes ? joinListResult(result_idxs) : joinListResult(result);
   }
 };
 
 class OrQueryOperation : public QueryOperation{
   using QueryOperation::query_terms;
   v_str result;
+  std::vector<int> result_idxs;
+
 public:
-  explicit OrQueryOperation(v_str *query_terms) : QueryOperation(query_terms){}
+  explicit OrQueryOperation(v_str *query_terms, bool with_indexes) : QueryOperation(query_terms, with_indexes){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
-    result = i_idx.termListUnionByDocNames(d_handler, *query_terms);
+    if(with_indexes){
+      result_idxs = i_idx.termListUnion(d_handler, *query_terms);
+    }
+    else{
+      result = i_idx.termListUnionByDocNames(d_handler, *query_terms);
+    }
   }
 
   std::string getResult() override {
-    return joinListResult(result);
+    return with_indexes ? joinListResult(result_idxs) : joinListResult(result);
   }
 };
 
@@ -65,7 +80,7 @@ class DFQueryOperation : public QueryOperation{
   using QueryOperation::query_terms;
   uint result;
 public:
-  explicit DFQueryOperation(v_str *query_terms) : QueryOperation(query_terms), result(0){}
+  explicit DFQueryOperation(v_str *query_terms) : QueryOperation(query_terms, false), result(0){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
     assert(query_terms->size() == 1);
@@ -82,7 +97,7 @@ class IthDocQueryOperation : public QueryOperation{
   using QueryOperation::query_terms;
   std::string result;
 public:
-  explicit IthDocQueryOperation(v_str *query_terms) : QueryOperation(query_terms){}
+  explicit IthDocQueryOperation(v_str *query_terms) : QueryOperation(query_terms, false){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
     assert(query_terms->size() == 2);
@@ -107,6 +122,7 @@ int main(int argc, char **argv) {
   static const std::string QUERY_INPUT_TYPE = "query_input_type";
   static const std::string FILE_PATH = "queries_file_path";
   static const std::string SILENCE_RESULTS = "silence_results";
+  static const std::string INDEX_RESULTS = "index_results";
 
   std::vector<SummaryOptions> opts = {
           {INDEX_PATH,       "Path where the index is stored", cxxopts::value<std::string>()},
@@ -121,6 +137,7 @@ int main(int argc, char **argv) {
   }
 
   acc_opts(SILENCE_RESULTS, "If this is active, the results will not be shown");
+  acc_opts(INDEX_RESULTS, "If this is active, the results will be shown as indexes of documents");
 
   std::unique_ptr<cxxopts::ParseResult> result_opt_ptr;
 
@@ -151,6 +168,7 @@ int main(int argc, char **argv) {
 
 
   auto silence_results = result_opt[SILENCE_RESULTS].as<bool>();
+  auto index_results = result_opt[INDEX_RESULTS].as<bool>();
 
   std::regex word_regex("([^\\s]+)");
 
@@ -184,10 +202,10 @@ int main(int argc, char **argv) {
 
       std::unique_ptr<QueryOperation> qop;
       if(query_op_s == "AND"){
-        qop = std::make_unique<AndQueryOperation>(query_terms.get());
+        qop = std::make_unique<AndQueryOperation>(query_terms.get(), index_results);
       }
       else if(query_op_s == "OR"){
-        qop = std::make_unique<OrQueryOperation>(query_terms.get());
+        qop = std::make_unique<OrQueryOperation>(query_terms.get(), index_results);
       }
       else if(query_op_s == "DOCUMENT_FREQUENCY"){
         qop = std::make_unique<DFQueryOperation>(query_terms.get());
@@ -224,7 +242,7 @@ int main(int argc, char **argv) {
   for(const auto &qop : queries_ops){
     qop->runOperation(loadedDocHandler, loadedIdx);
     if(!silence_results){
-      result.push_back(qop->getResult());
+        result.push_back(qop->getResult());
     }
   }
   auto end_time = std::chrono::steady_clock::now();
