@@ -19,9 +19,15 @@
 
 #include <vector>
 
+#include <cassert>
+
+#include <chrono>
+
+
 #include "TermOrdering.hpp"
 #include "TermGrouping.hpp"
 #include "SimpleStorage.hpp"
+
 
 /** Inverted Index structure, built from WordToDocFreqMap.
  * Has AND, OR operations **/
@@ -385,8 +391,54 @@ private:
     return treeTraversal<TraversalOperation>(query_terms);
   }
 
+  template<class T>
+  class CircularQueue{
+    std::vector<T> container;
+    int front_idx;
+    int back_idx;
+    size_t e_count;
+
+  public:
+
+    CircularQueue() = delete;
+    //CircularQueue(CircularQueue &cq) = delete;
+
+    explicit CircularQueue(size_t container_size) : container(container_size), front_idx(0), back_idx(0), e_count(0){}
+
+    void push(const T &e){
+      assert(!full());
+      container[back_idx] = e;
+      back_idx = (back_idx + 1) % container.size();
+      e_count++;
+    }
+
+    T &front(){
+      return container[front_idx];
+    }
+
+    void pop_front(){
+      assert(!empty());
+      front_idx = (front_idx + 1) % container.size();
+      e_count--;
+    }
+
+    size_t size(){
+      return e_count;
+    }
+
+    bool empty(){
+      return size() == 0;
+    }
+
+    bool full(){
+      return size() ==  container.size();
+    }
+  };
+
   template<class TraversalOperation>
   std::vector<int> treeTraversal(std::vector<uint> &query_terms) {
+    auto pre_st = std::chrono::steady_clock::now();
+
     std::vector<int> output;
 
 
@@ -411,6 +463,7 @@ private:
     auto to_use_tn = prealloc_nodes[current_idx_tn].get();
     to_use_tn->idx = current_idx_tn;
 
+
     auto counter = 0;
     for(const auto& term : query_terms){
       auto[it, ft] = getTermInterval(term);
@@ -419,10 +472,11 @@ private:
       counter++;
     }
 
-    std::stack<TraversalNode*> traversalStack;
-    std::deque<uint> available_indexes;
+    std::stack<TraversalNode*, std::vector<TraversalNode*>> traversalStack;
+    //std::deque<uint> available_indexes;
+    CircularQueue<uint> available_indexes(max_depth);
     for(auto i = 1ul; i < max_depth; i++){
-      available_indexes.push_back(i);
+      available_indexes.push(i);
     }
 
     to_use_tn->left_symbol = left_symbol_root;
@@ -434,12 +488,20 @@ private:
 
     TraversalOperation traversalOperation;
 
+//
 
+    auto pre_et = std::chrono::steady_clock::now();
+    auto pre_elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(pre_et - pre_st).count();
+
+    auto start_time = std::chrono::steady_clock::now();
+
+
+//
     while (!traversalStack.empty()) {
       auto currentTNode_ptr = traversalStack.top();
       auto &currentTNode = *currentTNode_ptr;
       traversalStack.pop();
-      available_indexes.push_back(currentTNode.idx);
+      available_indexes.push(currentTNode.idx);
 
 
       if (traversalOperation.failCondition(currentTNode)) {
@@ -492,6 +554,12 @@ private:
       traversalStack.push(lc_ptr);
 
     }
+
+    auto end_time = std::chrono::steady_clock::now();
+    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
+
+    std::cout << "Pre traversal time: " << pre_elapsed_time << std::endl;
+    std::cout << "Traversal time: " << elapsed_time << std::endl;
 
 
     return output;
