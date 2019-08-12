@@ -13,6 +13,8 @@
 
 #include <stack>
 
+#include <array>
+
 #include <stdexcept>
 
 #include <vector>
@@ -257,7 +259,11 @@ private:
     std::unique_ptr<std::vector<uint>> right_indexes;
 
     WTNode wt_node;
+
+    uint idx;
+
   };
+
 
   static inline bool reachedSymbol(TraversalNode &currentTNode) {
     return currentTNode.left_symbol == currentTNode.right_symbol;
@@ -282,10 +288,12 @@ private:
         
         auto left_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
         auto right_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
-        left_indexes_lc.push_back(left_val_lc);
-        right_indexes_lc.push_back(right_val_lc);
-        left_indexes_rc.push_back(current_li - left_val_lc + 1);
-        right_indexes_rc.push_back(current_ri - right_val_lc);
+
+        left_indexes_lc[i] = left_val_lc;
+        right_indexes_lc[i] = right_val_lc;
+        left_indexes_rc[i] = current_li - left_val_lc + 1;
+        right_indexes_rc[i] = current_ri - right_val_lc;
+
       }
     }
 
@@ -323,15 +331,23 @@ private:
                                  std::vector<uint> &right_indexes_rc) {
 
       for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
-        auto current_li = currentTNode.left_indexes->at(i);
-        auto current_ri = currentTNode.right_indexes->at(i);
         if(!failed[i]){
-          auto left_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
-          auto right_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
-          left_indexes_lc.push_back(left_val);
-          right_indexes_lc.push_back(right_val);
-          left_indexes_rc.push_back(current_li - left_val + 1);
-          right_indexes_rc.push_back(current_ri - right_val);
+          auto current_li = currentTNode.left_indexes->at(i);
+          auto current_ri = currentTNode.right_indexes->at(i);
+
+          auto left_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
+          auto right_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
+
+          left_indexes_lc[i] = left_val_lc;
+          right_indexes_lc[i] = right_val_lc;
+          left_indexes_rc[i] = current_li - left_val_lc + 1;
+          right_indexes_rc[i] = current_ri - right_val_lc;
+        }
+        else{
+          left_indexes_lc[i] = 1;
+          right_indexes_lc[i] = 0;
+          left_indexes_rc[i] = 1;
+          right_indexes_rc[i] = 0;
         }
       }
     }
@@ -374,35 +390,56 @@ private:
     std::vector<int> output;
 
 
-    auto left_terms = std::make_unique<std::vector<uint>>();
-    auto right_terms = std::make_unique<std::vector<uint>>();
-    for(const auto& term : query_terms){
-      auto[it, ft] = getTermInterval(term);
-      left_terms->push_back(it);
-      right_terms->push_back(ft);
+    auto root = wtHandler->getRoot();
+    const uint left_symbol_root = 0u;
+
+    const auto greaterPowerOf2 = (uint)std::ceil(std::log2(alphabet_sz));
+
+    const uint right_symbol_root = (1u << (greaterPowerOf2)) - 1;
+
+    const auto max_depth = greaterPowerOf2 + 2;
+    //std::array<std::unique_ptr<TraversalNode>, max_depth> prealloc_nodes;
+    std::vector<std::unique_ptr<TraversalNode>> prealloc_nodes(max_depth);
+    //auto prealloc_nodes = std::make_unique<TraversalNode[]>(max_depth);
+    for(auto &tn_ptr : prealloc_nodes){
+      tn_ptr = std::make_unique<TraversalNode>();
+      tn_ptr->left_indexes = std::make_unique<std::vector<uint>>(query_terms.size());
+      tn_ptr->right_indexes = std::make_unique<std::vector<uint>>(query_terms.size());
     }
 
+    auto current_idx_tn = 0;
+    auto to_use_tn = prealloc_nodes[current_idx_tn].get();
+    to_use_tn->idx = current_idx_tn;
 
-    std::stack<TraversalNode> traversalStack;
+    auto counter = 0;
+    for(const auto& term : query_terms){
+      auto[it, ft] = getTermInterval(term);
+      (*to_use_tn->left_indexes)[counter] = it;
+      (*to_use_tn->right_indexes)[counter] = ft;
+      counter++;
+    }
 
-    auto root = wtHandler->getRoot();
-    uint left_symbol_root = 0u;
+    std::stack<TraversalNode*> traversalStack;
+    std::deque<uint> available_indexes;
+    for(auto i = 1ul; i < max_depth; i++){
+      available_indexes.push_back(i);
+    }
 
-    auto greaterPowerOf2 = (uint)std::ceil(std::log2(alphabet_sz));
+    to_use_tn->left_symbol = left_symbol_root;
+    to_use_tn->right_symbol = right_symbol_root;
+    to_use_tn->wt_node = root;
 
-    uint right_symbol_root = (1u << (greaterPowerOf2)) - 1;
+    traversalStack.push(to_use_tn);
 
-    traversalStack.push({left_symbol_root,
-                         right_symbol_root,
-                         std::move(left_terms),
-                         std::move(right_terms),
-                         root});
 
     TraversalOperation traversalOperation;
 
+
     while (!traversalStack.empty()) {
-      auto currentTNode = std::move(traversalStack.top());
+      auto currentTNode_ptr = traversalStack.top();
+      auto &currentTNode = *currentTNode_ptr;
       traversalStack.pop();
+      available_indexes.push_back(currentTNode.idx);
 
 
       if (traversalOperation.failCondition(currentTNode)) {
@@ -418,38 +455,44 @@ private:
         continue;
       }
 
+      auto lc_idx = available_indexes.front(); available_indexes.pop_front();
+      auto rc_idx = available_indexes.front(); available_indexes.pop_front();
+
+
       uint m = (currentTNode.left_symbol + currentTNode.right_symbol) >> 1u;
 
-      auto left_indexes_lc = std::make_unique<std::vector<uint>>();
-      auto right_indexes_lc = std::make_unique<std::vector<uint>>();
-      auto left_indexes_rc = std::make_unique<std::vector<uint>>();
-      auto right_indexes_rc = std::make_unique<std::vector<uint>>();
+      auto lc_ptr = prealloc_nodes[lc_idx].get();
+      auto rc_ptr = prealloc_nodes[rc_idx].get();
+      auto &lc = *lc_ptr;
+      auto &rc = *rc_ptr;
 
-      traversalOperation.setTermVariables(*wtHandler, currentTNode, *left_indexes_lc, *right_indexes_lc,
-              *left_indexes_rc, *right_indexes_rc);
+      lc.idx = lc_idx;
+      rc.idx = rc_idx;
+
+      auto &left_indexes_lc = *lc.left_indexes;
+      auto &right_indexes_lc = *lc.right_indexes;
+      auto &left_indexes_rc = *rc.left_indexes;
+      auto &right_indexes_rc = *rc.right_indexes;
+
+      traversalOperation.setTermVariables(*wtHandler, currentTNode, left_indexes_lc, right_indexes_lc,
+              left_indexes_rc, right_indexes_rc);
 
       auto[left_child, right_child] = wtHandler->getChildren(currentTNode.wt_node);
 
 
-      TraversalNode traversal_node_left = {
-              currentTNode.left_symbol,
-              m,
-              std::move(left_indexes_lc),
-              std::move(right_indexes_lc),
-              left_child
-      };
+      lc.left_symbol = currentTNode.left_symbol;
+      lc.right_symbol = m;
+      lc.wt_node = left_child;
 
+      rc.left_symbol = m + 1;
+      rc.right_symbol = currentTNode.right_symbol;
+      rc.wt_node = right_child;
 
-      TraversalNode traversal_node_right = {
-              m + 1, currentTNode.right_symbol,
-              std::move(left_indexes_rc),
-              std::move(right_indexes_rc),
-              right_child
-      };
+      traversalStack.push(rc_ptr);
+      traversalStack.push(lc_ptr);
 
-      traversalStack.push(std::move(traversal_node_right));
-      traversalStack.push(std::move(traversal_node_left));
     }
+
 
     return output;
   }

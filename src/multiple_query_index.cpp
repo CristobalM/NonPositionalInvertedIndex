@@ -22,7 +22,8 @@ public:
   explicit QueryOperation(v_str *query_terms) : query_terms(query_terms){}
   virtual void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) = 0;
   virtual std::string getResult() = 0;
-  static std::string joinListResult(v_str &list_result){
+  template<class T>
+  static std::string joinListResult(T &list_result){
     std::stringstream ss;
     for(const auto &r : list_result){
       ss << r << "\n";
@@ -33,12 +34,14 @@ public:
 
 class AndQueryOperation : public QueryOperation{
   using QueryOperation::query_terms;
-  v_str result;
+  //v_str result;
+  std::vector<int> result;
+
 public:
   explicit AndQueryOperation(v_str *query_terms) : QueryOperation(query_terms){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
-    result = i_idx.termListIntersectionByDocNames(d_handler, *query_terms);
+    result = i_idx.termListIntersection(d_handler, *query_terms);
   }
 
   std::string getResult() override {
@@ -48,12 +51,13 @@ public:
 
 class OrQueryOperation : public QueryOperation{
   using QueryOperation::query_terms;
-  v_str result;
+  //v_str result;
+  std::vector<int> result;
 public:
   explicit OrQueryOperation(v_str *query_terms) : QueryOperation(query_terms){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
-    result = i_idx.termListUnionByDocNames(d_handler, *query_terms);
+    result = i_idx.termListUnion(d_handler, *query_terms);
   }
 
   std::string getResult() override {
