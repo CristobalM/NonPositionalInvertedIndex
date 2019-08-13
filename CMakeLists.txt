@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_CXX_FLAGS "-O3 -Wall -Wextra")
 
+
 # SDSL install location
 include_directories(~/include)
 link_directories(~/lib)
@@ -22,7 +23,9 @@ set(INCLUDES_FILES
         BVHGog.hpp
         DocumentInfo.hpp
         DocumentsHandler.hpp
-        SafeQueue.hpp)
+        SafeQueue.hpp
+        CircularQueue.hpp
+        )
 
 set(SOURCES_FILES
         DocumentInfo.cpp
@@ -52,9 +55,11 @@ add_executable(example_2_load_from_disk examples/example_2_load_from_disk.cpp)
 add_executable(build_inverted_index src/build_inverted_index.cpp)
 add_executable(single_query_index src/single_query_index.cpp)
 add_executable(multiple_query_index src/multiple_query_index.cpp)
+add_executable(prueba_circular src/prueba_circular.cpp)
 
 target_link_libraries(example_1 NonPosInvIdx)
 target_link_libraries(example_2_load_from_disk NonPosInvIdx)
 target_link_libraries(build_inverted_index NonPosInvIdx)
 target_link_libraries(single_query_index NonPosInvIdx)
 target_link_libraries(multiple_query_index NonPosInvIdx)
+target_link_libraries(prueba_circular NonPosInvIdx)

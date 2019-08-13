@@ -12,14 +12,18 @@
 #include <cmath>
 
 #include <stack>
-
+#include <array>
 #include <stdexcept>
-
 #include <vector>
+#include <cassert>
+
+#include <chrono>
+#include <list>
 
 #include "TermOrdering.hpp"
 #include "TermGrouping.hpp"
 #include "SimpleStorage.hpp"
+#include "CircularQueue.hpp"
 
 /** Inverted Index structure, built from WordToDocFreqMap.
  * Has AND, OR operations **/
@@ -253,41 +257,56 @@ private:
     uint left_symbol;
     uint right_symbol;
 
-    std::unique_ptr<std::vector<uint>> left_indexes;
-    std::unique_ptr<std::vector<uint>> right_indexes;
+    //std::unique_ptr<std::vector<uint>> left_indexes;
+    //std::unique_ptr<std::vector<uint>> right_indexes;
+
+    std::vector<uint> left_indexes;
+    std::vector<uint> right_indexes;
 
     WTNode wt_node;
+
+    uint idx;
+
   };
+
 
   static inline bool reachedSymbol(TraversalNode &currentTNode) {
     return currentTNode.left_symbol == currentTNode.right_symbol;
   }
 
   struct AndOperation {
+
     static inline bool failCondition(TraversalNode &currentTNode) {
-      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
-        if(currentTNode.left_indexes->at(i) > currentTNode.right_indexes->at(i)){
+      for (auto i = 0ul; i < currentTNode.left_indexes.size(); i++) {
+        if (currentTNode.left_indexes[i] > currentTNode.right_indexes[i]) {
           return true;
         }
       }
       return false;
     }
 
-    static inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode, std::vector<uint> &left_indexes_lc,
-                                        std::vector<uint> &right_indexes_lc, std::vector<uint> &left_indexes_rc,
-                                        std::vector<uint> &right_indexes_rc) {
-      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
-        auto current_li = currentTNode.left_indexes->at(i);
-        auto current_ri = currentTNode.right_indexes->at(i);
-        
+    static inline void
+    setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode, std::vector<uint> &left_indexes_lc,
+                     std::vector<uint> &right_indexes_lc, std::vector<uint> &left_indexes_rc,
+                     std::vector<uint> &right_indexes_rc) {
+
+      for (auto i = 0ul; i < currentTNode.left_indexes.size(); i++) {
+        auto current_li = currentTNode.left_indexes[i];
+        auto current_ri = currentTNode.right_indexes[i];
+
         auto left_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
         auto right_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
-        left_indexes_lc.push_back(left_val_lc);
-        right_indexes_lc.push_back(right_val_lc);
-        left_indexes_rc.push_back(current_li - left_val_lc + 1);
-        right_indexes_rc.push_back(current_ri - right_val_lc);
+
+        left_indexes_lc[i] = left_val_lc;
+        right_indexes_lc[i] = right_val_lc;
+        left_indexes_rc[i] = current_li - left_val_lc + 1;
+        right_indexes_rc[i] = current_ri - right_val_lc;
+
       }
     }
+
+    double getElapsedST(){return 0;}
+    double getElapsedNF(){return 0;}
 
     static inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode) {
       intersection_result.push_back(currentTNode.left_symbol);
@@ -295,54 +314,74 @@ private:
   };
 
   struct OrOperation {
-    std::vector<bool> failed;
+    std::list<uint> not_failed;
     std::unordered_map<uint, bool> foundTerms;
+    std::chrono::duration<double> duration_loop_st;
+    std::chrono::duration<double> duration_loop_nf;
 
-    inline bool failCondition(TraversalNode &currentTNode) {
-      if(failed.size() == 0){
-        failed.resize(currentTNode.left_indexes->size());
-        for(auto i = 0ul; i < failed.size(); i++){
-          failed[i] = false;
+    OrOperation() : duration_loop_st(0), duration_loop_nf(0) {}
+
+    double getElapsedST(){return std::chrono::duration_cast<std::chrono::milliseconds>(duration_loop_st).count();}
+    double getElapsedNF(){return std::chrono::duration_cast<std::chrono::milliseconds>(duration_loop_nf).count();}
+
+
+    bool failCondition(TraversalNode &currentTNode) {
+      if(not_failed.size() == 0){
+        for(auto i = 0ul; i < currentTNode.left_indexes.size(); i++){
+          not_failed.push_back(i);
+        }
+      }
+      auto start_time = std::chrono::steady_clock::now();
+
+      for(auto it = not_failed.begin(); it != not_failed.end(); ){
+        auto i = *it;
+        auto current_li = currentTNode.left_indexes[i];
+        auto current_ri = currentTNode.right_indexes[i];
+        if(current_li > current_ri){
+          it = not_failed.erase(it);
+        }else{
+          it++;
         }
       }
 
-      bool failing = true;
+      auto end_time = std::chrono::steady_clock::now();
+      auto elapsed_time = end_time - start_time;
+      duration_loop_nf = duration_loop_nf + elapsed_time;
 
-      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
-        auto current_li = currentTNode.left_indexes->at(i);
-        auto current_ri = currentTNode.right_indexes->at(i);
-        failed[i] = current_li > current_ri;
-        failing = failing && failed[i];
-      }
-
-      return failing;
+      return not_failed.size() == 0;
     }
 
-    inline void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode, std::vector<uint> &left_indexes_lc,
+    void setTermVariables(WTHandler &wt_handler, TraversalNode &currentTNode, std::vector<uint> &left_indexes_lc,
                                  std::vector<uint> &right_indexes_lc, std::vector<uint> &left_indexes_rc,
                                  std::vector<uint> &right_indexes_rc) {
 
-      for(auto i = 0ul; i < currentTNode.left_indexes->size(); i++){
-        auto current_li = currentTNode.left_indexes->at(i);
-        auto current_ri = currentTNode.right_indexes->at(i);
-        if(!failed[i]){
-          auto left_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
-          auto right_val = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
-          left_indexes_lc.push_back(left_val);
-          right_indexes_lc.push_back(right_val);
-          left_indexes_rc.push_back(current_li - left_val + 1);
-          right_indexes_rc.push_back(current_ri - right_val);
-        }
+      auto start_time = std::chrono::steady_clock::now();
+
+
+      for(auto it = not_failed.begin(); it != not_failed.end(); it++){
+        auto i = *it;
+        auto current_li = currentTNode.left_indexes[i];
+        auto current_ri = currentTNode.right_indexes[i];
+
+        auto left_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_li - 1) + 1;
+        auto right_val_lc = wt_handler.innerBVRank_0(currentTNode.wt_node, current_ri);
+
+        left_indexes_lc[i] = left_val_lc;
+        right_indexes_lc[i] = right_val_lc;
+        left_indexes_rc[i] = current_li - left_val_lc + 1;
+        right_indexes_rc[i] = current_ri - right_val_lc;
       }
+      auto end_time = std::chrono::steady_clock::now();
+      auto elapsed_time = (end_time - start_time);
+      duration_loop_st = duration_loop_st + elapsed_time;
     }
 
-    inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode) {
+    void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode) {
       auto term = currentTNode.left_symbol;
       if (foundTerms.find(term) == foundTerms.end()) {
         foundTerms[term] = true;
         intersection_result.push_back(currentTNode.left_symbol);
       }
-
     }
 
   };
@@ -369,40 +408,67 @@ private:
     return treeTraversal<TraversalOperation>(query_terms);
   }
 
-  template<class TraversalOperation>
+
+
+  template<class TraversalOperation, uint32_t bufsz=100>
   std::vector<int> treeTraversal(std::vector<uint> &query_terms) {
+    auto pre_st = std::chrono::steady_clock::now();
+
     std::vector<int> output;
 
 
-    auto left_terms = std::make_unique<std::vector<uint>>();
-    auto right_terms = std::make_unique<std::vector<uint>>();
-    for(const auto& term : query_terms){
-      auto[it, ft] = getTermInterval(term);
-      left_terms->push_back(it);
-      right_terms->push_back(ft);
+    auto root = wtHandler->getRoot();
+    const uint left_symbol_root = 0u;
+
+    const auto greaterPowerOf2 = (uint)std::ceil(std::log2(alphabet_sz));
+
+    const uint right_symbol_root = (1u << (greaterPowerOf2)) - 1;
+
+    const auto max_depth = greaterPowerOf2 + 2;
+
+    std::array<TraversalNode, bufsz> prealloc_nodes;
+
+    for(auto &tn_ptr : prealloc_nodes){
+      tn_ptr.left_indexes.resize(query_terms.size());
+      tn_ptr.right_indexes.resize(query_terms.size());
     }
 
 
-    std::stack<TraversalNode> traversalStack;
+    auto current_idx_tn = 0;
+    auto &to_use_tn = prealloc_nodes[current_idx_tn];
+    to_use_tn.idx = current_idx_tn;
 
-    auto root = wtHandler->getRoot();
-    uint left_symbol_root = 0u;
 
-    auto greaterPowerOf2 = (uint)std::ceil(std::log2(alphabet_sz));
+    auto counter = 0;
+    for(const auto& term : query_terms){
+      auto[it, ft] = getTermInterval(term);
+      to_use_tn.left_indexes[counter] = it;
+      to_use_tn.right_indexes[counter] = ft;
+      counter++;
+    }
 
-    uint right_symbol_root = (1u << (greaterPowerOf2)) - 1;
 
-    traversalStack.push({left_symbol_root,
-                         right_symbol_root,
-                         std::move(left_terms),
-                         std::move(right_terms),
-                         root});
+    CircularQueue<uint, bufsz> traversalStack;
+    CircularQueue<uint, bufsz> available_indexes;
+    for(auto i = 1ul; i < max_depth; i++){
+      available_indexes.push(i);
+    }
+
+    to_use_tn.left_symbol = left_symbol_root;
+    to_use_tn.right_symbol = right_symbol_root;
+    to_use_tn.wt_node = root;
+
+    traversalStack.push(current_idx_tn);
+
 
     TraversalOperation traversalOperation;
 
+
     while (!traversalStack.empty()) {
-      auto currentTNode = std::move(traversalStack.top());
+      auto currentTNode_ptr = traversalStack.top();
+      auto &currentTNode = prealloc_nodes[currentTNode_ptr];
       traversalStack.pop();
+      available_indexes.push(currentTNode.idx);
 
 
       if (traversalOperation.failCondition(currentTNode)) {
@@ -418,37 +484,41 @@ private:
         continue;
       }
 
+      auto lc_idx = available_indexes.front(); available_indexes.pop_front();
+      auto rc_idx = available_indexes.front(); available_indexes.pop_front();
+
+
       uint m = (currentTNode.left_symbol + currentTNode.right_symbol) >> 1u;
 
-      auto left_indexes_lc = std::make_unique<std::vector<uint>>();
-      auto right_indexes_lc = std::make_unique<std::vector<uint>>();
-      auto left_indexes_rc = std::make_unique<std::vector<uint>>();
-      auto right_indexes_rc = std::make_unique<std::vector<uint>>();
+      auto &lc = prealloc_nodes[lc_idx];
+      auto &rc = prealloc_nodes[rc_idx];
 
-      traversalOperation.setTermVariables(*wtHandler, currentTNode, *left_indexes_lc, *right_indexes_lc,
-              *left_indexes_rc, *right_indexes_rc);
+
+      auto &left_indexes_lc = lc.left_indexes;
+      auto &right_indexes_lc = lc.right_indexes;
+      auto &left_indexes_rc = rc.left_indexes;
+      auto &right_indexes_rc = rc.right_indexes;
+
+      traversalOperation.setTermVariables(*wtHandler, currentTNode, left_indexes_lc, right_indexes_lc,
+              left_indexes_rc, right_indexes_rc);
 
       auto[left_child, right_child] = wtHandler->getChildren(currentTNode.wt_node);
 
 
-      TraversalNode traversal_node_left = {
-              currentTNode.left_symbol,
-              m,
-              std::move(left_indexes_lc),
-              std::move(right_indexes_lc),
-              left_child
-      };
+      lc.left_symbol = currentTNode.left_symbol;
+      lc.right_symbol = m;
+      lc.wt_node = std::move(left_child);
+      lc.idx = lc_idx;
+
+      rc.left_symbol = m + 1;
+      rc.right_symbol = currentTNode.right_symbol;
+      rc.wt_node = std::move(right_child);
+      rc.idx = rc_idx;
 
 
-      TraversalNode traversal_node_right = {
-              m + 1, currentTNode.right_symbol,
-              std::move(left_indexes_rc),
-              std::move(right_indexes_rc),
-              right_child
-      };
+      traversalStack.push(rc_idx);
+      traversalStack.push(lc_idx);
 
-      traversalStack.push(std::move(traversal_node_right));
-      traversalStack.push(std::move(traversal_node_left));
     }
 
     return output;

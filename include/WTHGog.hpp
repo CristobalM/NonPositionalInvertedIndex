@@ -82,7 +82,10 @@ public:
   }
 
   inline uint innerBVRank(WTNode &wtNode, uint idx) {
-    if (idx < 1 || idx > wtNode.size) {
+    if(idx == 0){
+      return 0;
+    }
+    if (idx > wtNode.size) {
       throw std::runtime_error("innerBVRank idx out of bounds: 1 <= " +
                                std::to_string(idx) + " <= " + std::to_string(wtNode.size));
     }
@@ -99,7 +102,7 @@ public:
     if(idx > wtNode.size){
       idx = wtNode.size;
     }
-    if (idx < 1 || idx > wtNode.size) {
+    if (idx < 0 || idx > wtNode.size) {
       throw std::runtime_error("innerBVRank_0 idx out of bounds: 1 <= " +
                                std::to_string(idx) + " <= " + std::to_string(wtNode.size));
     }
