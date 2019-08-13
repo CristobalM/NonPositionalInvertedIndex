@@ -11,7 +11,6 @@
 
 template<class T, uint32_t container_sz, class idx_type = uint>
 class CircularQueue{
-  //std::vector<T> container;
   std::array<T, container_sz> container;
   int front_idx;
   int back_idx;
@@ -26,9 +25,6 @@ class CircularQueue{
   }
 
 public:
-
-  //CircularQueue() = delete;
-  //CircularQueue(CircularQueue &cq) = delete;
 
   explicit CircularQueue() :  front_idx(0), back_idx(0), e_count(0){}
 

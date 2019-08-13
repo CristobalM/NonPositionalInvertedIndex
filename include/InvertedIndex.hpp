@@ -426,7 +426,6 @@ private:
 
     const auto max_depth = greaterPowerOf2 + 2;
 
-    //std::vector<TraversalNode> prealloc_nodes(max_depth);
     std::array<TraversalNode, bufsz> prealloc_nodes;
 
     for(auto &tn_ptr : prealloc_nodes){
@@ -448,7 +447,6 @@ private:
       counter++;
     }
 
-    //std::stack<uint, std::array<uint, bufsz>> traversalStack;
 
     CircularQueue<uint, bufsz> traversalStack;
     CircularQueue<uint, bufsz> available_indexes;
@@ -464,12 +462,6 @@ private:
 
 
     TraversalOperation traversalOperation;
-
-
-    auto pre_et = std::chrono::steady_clock::now();
-    auto pre_elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(pre_et - pre_st).count();
-
-    auto start_time = std::chrono::steady_clock::now();
 
 
     while (!traversalStack.empty()) {
@@ -528,15 +520,6 @@ private:
       traversalStack.push(lc_idx);
 
     }
-
-    auto end_time = std::chrono::steady_clock::now();
-    auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count();
-
-    std::cout << "Pre traversal time: " << pre_elapsed_time << std::endl;
-    std::cout << "Traversal time: " << elapsed_time << std::endl;
-    std::cout << "Loop duration NF: " << traversalOperation.getElapsedNF() << ". ST: "
-    << traversalOperation.getElapsedST() << std::endl;
-
 
     return output;
   }
