@@ -86,3 +86,4 @@ Other additional data required for the index uses 8.2 MB in disk
 The listing of words and documents in plain text uses 25 MB in disk, but could be further compressed.
 
 The uncompressed dataset occupies 806,2 MB in disk.
+In average a document occupies 41.7 KB.
