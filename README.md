@@ -1,6 +1,5 @@
 # Compact Non-positional inverted index
 
-**(This work is under progress)**
 
 This project implements the compact structure "Non-positional inverted index"
 described in the book **Compact Data Structures** by **Gonzalo Navarro**,
@@ -8,26 +7,6 @@ specifically at the section 6.4.3.
 
 This structure is implemented on top of the **Simon Gog's** Succinct Wavelet Tree
 which can be found on his [Succinct Data Structure Library](https://github.com/simongog/sdsl-lite).
-
-## Current progress
-
-### Done
-* Read documents inside a directory
-* Make wrapper for Gog's Wavelet Tree
-* Build Wavelet Tree
-* Implement basic inverted index operations
-* Sort terms by revelance order
-* Parametrize the relevance metric
-* Implement **AND**
-* Implement **OR**
-* Add disk storage support.
-* Extend AND and OR for more than two words.
-
-
-### To do
-
-* Compare to another inverted index.
-
 
 ## Build
 
@@ -94,3 +73,8 @@ Where each query means:
 * OR finds the documents where any of term1 term2 term3 ... appear in
 * DOCUMENT_FREQUENCY stands for the number of documents where term appears
 * ITH_DOCUMENT gives the ith document of the word specified by term, ordered by the word frequency in each document.
+
+## Performance evaluation
+
+On the [blogger](http://u.cs.biu.ac.il/~koppel/BlogCorpus.htm) dataset,
+on average, this index performs 559 AND queries per second and 179 OR queries per second.
