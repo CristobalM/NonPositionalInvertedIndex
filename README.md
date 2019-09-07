@@ -143,7 +143,7 @@ with the other indexes.
 
 ### Other scripts
 
-Some scripts were also created to process the text files
+Some scripts were created to process the text files
 
 * [documents-processing-scripts](https://github.com/CristobalM/documents-processing-scripts):
 For document cleaning and to generate query files.
