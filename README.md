@@ -77,7 +77,8 @@ Where each query means:
 ## Performance evaluation
 
 On the [blogger](http://u.cs.biu.ac.il/~koppel/BlogCorpus.htm) dataset,
-on average, this index performs 559 AND queries per second and 179 OR queries per second.
+on average, this index performs 559 AND queries per second and 179 OR queries per second. Each query had 3 words, consisting of a phrase inside one of the documents.
+
 That corpus has 19320 documents and 1277708 unique words within those documents.
 
 The compact wavelet tree uses 69.6 MB in disk.
