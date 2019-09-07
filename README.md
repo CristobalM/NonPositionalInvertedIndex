@@ -87,3 +87,65 @@ The listing of words and documents in plain text uses 25 MB in disk, but could b
 
 The uncompressed dataset occupies 806,2 MB in disk.
 In average a document occupies 41.7 KB.
+
+## Comparison to other indexes
+
+More indexes were also built on the ones provided by the [pisa-engine](https://github.com/pisa-engine/pisa).
+Those indexes are Elias-Fano, Block-Interpolative and QMX, described in [https://pisa.readthedocs.io/en/latest/compress_index.html](https://pisa.readthedocs.io/en/latest/compress_index.html).
+
+
+The following results are each one an average from several runs:
+
+### This index
+
+AND: 559 queries per second
+
+OR: 179 queries per second
+
+Space: 69.6 MB in disk
+
+### Elias-Fano
+
+AND: 1607 queries per second
+
+OR: 1470 queries per second
+
+Space: 32.5 MB in disk
+
+### Block-Interpolative
+
+AND: 1030 queries per second
+
+OR: 857 queries per second
+
+Space: 31.9 MB in disk
+
+### QMX
+
+AND: 2177 queries per second
+
+OR: 1583 queries per second
+
+Space: 41 MB in disk
+
+
+### Analysis
+
+This means the index implemented here is much slower than the ones from pisa-engine
+and uses more space. This could mean two things, one is that the implementation here
+is not good and can be further improved, other is that the representation is not good enough
+to be used as an inverted index, which I think is less likely than the first option.
+
+In terms of space, the disappointing (comparative) result is likely because the alphabet of documents and terms is being represented by
+32 bits integers. Here we have 19320 documents, and using a 16 bit integer to represent them can reduce the space by half and then it would be competitive
+with the other indexes.
+
+
+### Other scripts
+
+Some scripts were also created to process the text files
+
+* [documents-processing-scripts](https://github.com/CristobalM/documents-processing-scripts):
+For document cleaning and to generate query files.
+
+* [pisa_formatter](https://github.com/CristobalM/pisa_formatter): To convert documents into the format accepted by pisa-engine
