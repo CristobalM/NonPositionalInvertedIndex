@@ -131,7 +131,7 @@ Space: 41 MB in disk
 
 ### Analysis
 
-This means the index implemented here is much slower than the ones from pisa-engine
+This means that the index implemented here is much slower than the ones from pisa-engine
 and uses more space. This could mean two things, one is that the implementation here
 is not good and can be further improved, other is that the representation is not good enough
 to be used as an inverted index, which I think is less likely than the first option.
