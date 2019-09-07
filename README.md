@@ -78,3 +78,4 @@ Where each query means:
 
 On the [blogger](http://u.cs.biu.ac.il/~koppel/BlogCorpus.htm) dataset,
 on average, this index performs 559 AND queries per second and 179 OR queries per second.
+That corpus has 19320 documents and 1277708 unique words within those documents.
