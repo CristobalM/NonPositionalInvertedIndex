@@ -14,7 +14,7 @@ which can be found on his [Succinct Data Structure Library](https://github.com/s
 * Alternatively, SDSL install location can be changed from CMakeLists.txt
 
 * <experimental/filesystem> is a dependency of this project, make sure you have
-C++17 and your compiler up to date. This is known to work under GCC 7.4.0.
+C++17 and your compiler up to date. This is known to work under GCC 7.4.0 and under Ubuntu 18.04.
 
 From the root directory of this project run:
 
