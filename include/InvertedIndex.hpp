@@ -40,6 +40,7 @@ public:
   explicit InvertedIndex(WordToDocFreqMap &wordToDocFreqMap, const std::string &index_name_) :
   alphabet_sz((uint) wordToDocFreqMap.getUniqueDocsCount()), index_name(index_name_) {
     buildInvertedIndex(wordToDocFreqMap);
+    silence_results = false;
   }
 
   explicit InvertedIndex(std::unique_ptr<WTHandler> &&wt_handler_,
@@ -52,7 +53,7 @@ public:
           word_idx_mapping(word_idx_mapping_),
           alphabet_sz(alphabet_sz_),
           index_name(index_name_){
-
+    silence_results = false;
   }
 
   void save(const std::string &index_path){
@@ -180,6 +181,10 @@ public:
     return *wtHandler;
   }
 
+  void silenceResults(){
+    silence_results = true;
+  }
+
 
 
 private:
@@ -190,6 +195,8 @@ private:
   uint alphabet_sz;
 
   std::string index_name;
+
+  bool silence_results;
 
   std::vector<uint> getIndexesFromTerms(WordToDocFreqMap &wordToDocFreqMap, std::vector<std::string> &terms_list){
     std::vector<uint> indexes_list;
@@ -308,8 +315,11 @@ private:
     double getElapsedST(){return 0;}
     double getElapsedNF(){return 0;}
 
-    static inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode) {
-      intersection_result.push_back(currentTNode.left_symbol);
+    static inline void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode, InvertedIndex &invi) {
+      if(!invi.silence_results){
+        intersection_result.push_back(currentTNode.left_symbol);
+      }
+
     }
   };
 
@@ -376,11 +386,14 @@ private:
       duration_loop_st = duration_loop_st + elapsed_time;
     }
 
-    void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode) {
+    void reachedSymbolAction(std::vector<int> &intersection_result, TraversalNode &currentTNode, InvertedIndex &invi) {
       auto term = currentTNode.left_symbol;
       if (foundTerms.find(term) == foundTerms.end()) {
         foundTerms[term] = true;
-        intersection_result.push_back(currentTNode.left_symbol);
+        if(!invi.silence_results){
+          intersection_result.push_back(currentTNode.left_symbol);
+        }
+
       }
     }
 
@@ -476,7 +489,7 @@ private:
       }
 
       if (reachedSymbol(currentTNode)) {
-        traversalOperation.reachedSymbolAction(output, currentTNode);
+        traversalOperation.reachedSymbolAction(output, currentTNode, *this);
         continue;
       }
 

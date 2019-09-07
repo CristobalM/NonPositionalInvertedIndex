@@ -20,7 +20,8 @@ protected:
   v_str *query_terms;
   bool with_indexes;
 public:
-  explicit QueryOperation(v_str *query_terms, bool with_indexes) : query_terms(query_terms), with_indexes(with_indexes){}
+  explicit QueryOperation(v_str *query_terms, bool with_indexes) :
+  query_terms(query_terms), with_indexes(with_indexes){}
   virtual void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) = 0;
   virtual std::string getResult() = 0;
   template <class T>
@@ -38,7 +39,8 @@ class AndQueryOperation : public QueryOperation{
   v_str result;
   std::vector<int> result_idxs;
 public:
-  explicit AndQueryOperation(v_str *query_terms, bool with_indexes) : QueryOperation(query_terms, with_indexes){}
+  explicit AndQueryOperation(v_str *query_terms, bool with_indexes) :
+  QueryOperation(query_terms, with_indexes){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
     if(with_indexes){
@@ -60,7 +62,8 @@ class OrQueryOperation : public QueryOperation{
   std::vector<int> result_idxs;
 
 public:
-  explicit OrQueryOperation(v_str *query_terms, bool with_indexes) : QueryOperation(query_terms, with_indexes){}
+  explicit OrQueryOperation(v_str *query_terms, bool with_indexes) :
+  QueryOperation(query_terms, with_indexes){}
 
   void runOperation(DocumentsHandler &d_handler, NonPosInvIdx &i_idx) override {
     if(with_indexes){
@@ -235,6 +238,9 @@ int main(int argc, char **argv) {
   auto &loadedDocHandler = *loadedDocHandler_ptr;
 
   auto loadedIdx = NonPosInvIdx::load(index_base_path, index_filename);
+  if(silence_results){
+    loadedIdx.silenceResults();
+  }
 
   v_str result;
 
